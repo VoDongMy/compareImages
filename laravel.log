@@ -1,0 +1,14 @@
+[2017-03-09 03:02:10] production.ERROR: InvalidArgumentException: Command "dump-autoload" is not defined. in /var/www/html/Batr_server/vendor/symfony/console/Application.php:511
+Stack trace:
+#0 /var/www/html/Batr_server/vendor/symfony/console/Application.php(186): Symfony\Component\Console\Application->find('dump-autoload')
+#1 /var/www/html/Batr_server/vendor/symfony/console/Application.php(120): Symfony\Component\Console\Application->doRun(Object(Symfony\Component\Console\Input\ArgvInput), Object(Symfony\Component\Console\Output\ConsoleOutput))
+#2 /var/www/html/Batr_server/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(107): Symfony\Component\Console\Application->run(Object(Symfony\Component\Console\Input\ArgvInput), Object(Symfony\Component\Console\Output\ConsoleOutput))
+#3 /var/www/html/Batr_server/artisan(35): Illuminate\Foundation\Console\Kernel->handle(Object(Symfony\Component\Console\Input\ArgvInput), Object(Symfony\Component\Console\Output\ConsoleOutput))
+#4 {main}  
+[2017-03-09 03:03:02] production.ERROR: InvalidArgumentException: Command "dump-autoload" is not defined. in /var/www/html/Batr_server/vendor/symfony/console/Application.php:511
+Stack trace:
+#0 /var/www/html/Batr_server/vendor/symfony/console/Application.php(186): Symfony\Component\Console\Application->find('dump-autoload')
+#1 /var/www/html/Batr_server/vendor/symfony/console/Application.php(120): Symfony\Component\Console\Application->doRun(Object(Symfony\Component\Console\Input\ArgvInput), Object(Symfony\Component\Console\Output\ConsoleOutput))
+#2 /var/www/html/Batr_server/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(107): Symfony\Component\Console\Application->run(Object(Symfony\Component\Console\Input\ArgvInput), Object(Symfony\Component\Console\Output\ConsoleOutput))
+#3 /var/www/html/Batr_server/artisan(35): Illuminate\Foundation\Console\Kernel->handle(Object(Symfony\Component\Console\Input\ArgvInput), Object(Symfony\Component\Console\Output\ConsoleOutput))
+#4 {main}  
