@@ -14,11 +14,13 @@ class Controller extends BaseController
 
     public function getDescription()
     {
-        $res = ['sever_name'=>'Batr', 
+        $res = ['status' => 200,
+                'messages' => 'request success',
+                'sever_name'=>'Batr', 
                 'version' => '1.0.1',
                 'language' => 'php',
                 'database' => 'mysql',
-                'décription' => ''];
+                'description' => ''];
         dd($res);        
     }
 }
