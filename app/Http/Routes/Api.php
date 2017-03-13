@@ -4,10 +4,16 @@ Route::group(['prefix' => 'api/'], function() {
     //
     Route::get('/', 'Controller@getDescription');
 
-    // API version 1.0.0
-    Route::group(['prefix' => 'v1'], function() {
+    /* API version 1.0.0
+    *  Created by PhpStorm.
+    *  User: tantq
+    *  Date: 23/11/2015
+    */
+    Route::group(['prefix' => 'version/1.0/', 'namespace' => 'Api', 'as' => 'api.v1'], function() {
+
         //
         Route::get('/', 'Controller@getDescription');
+        Route::get('test', 'UserController@test');
         Route::post('signup', 'UserController@postSignup');
         Route::post('update', 'UserController@postUpdate');
         Route::post('setting', 'UserController@setting');
@@ -38,10 +44,12 @@ Route::group(['prefix' => 'api/'], function() {
 
 
     /* API version 1.0.1
+    *  User: tantq
     *  09/03/2017
     * 
     */
-    Route::group(['prefix' => 'version/1.0.1/'], function() {
+    Route::group(['prefix' => 'version/1.0.1/', 'namespace' => 'Api', 'as' => 'api.version.1-0-1'], function() {
+
         //
         Route::get('/', 'Controller@getDescription');
     });

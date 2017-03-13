@@ -6,7 +6,7 @@
  * Time: 01:32
  */
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 
 use App\Bids;

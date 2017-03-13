@@ -6,7 +6,7 @@
  * Time: 02:41
  */
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 
 use App\Bids;
@@ -18,17 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Facades\Image;
 
-class UserController extends Controller{
-
-    public function __construct(Request $request) {
-      parent::__construct($request);
-   }
-    public function test()
-    {
-        $dat = 'November 3,1988';
-        //return date('Y-m-d',strtotime($dat));
-        return view('welcome');
-    }
+class UserController extends BaseController{
 
     public function postSignup(Request $request)
     {
@@ -95,7 +85,6 @@ class UserController extends Controller{
                 'data'   => $messages
             ], 200);
         }
-
     }
 
     public function postUpdate(Request $request)
@@ -222,6 +211,7 @@ class UserController extends Controller{
             ], 200);
         }
     }
+
     public function remove_wishlist(Request $request)
     {
         if ($request->has('key') )
@@ -264,9 +254,8 @@ class UserController extends Controller{
                 'data'   => $messages
             ], 200);
         }
-
-
     }
+
     public function wishlist(Request $request)
     {
         if ($request->has('key') )
@@ -307,6 +296,7 @@ class UserController extends Controller{
             ], 200);
         }
     }
+
     public function listing(Request $request)
     {
         if ($request->has('key') )
@@ -414,6 +404,7 @@ class UserController extends Controller{
                 'data'   => $messages
             ], 200);
     }
+
     public function get_my_bids(Request $request)
     {
         if ($request->has('key') ) {
@@ -456,6 +447,7 @@ class UserController extends Controller{
             'data'   => $messages
         ], 200); ;
     }
+
     public function delete_account(Request $request)
     {
         if ($request->has('key') )
