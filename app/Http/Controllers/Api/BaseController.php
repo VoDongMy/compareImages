@@ -19,7 +19,7 @@ class BaseController extends Controller
      * @param  integer $code [description]
      * @return [type]        [description]
      */
-    protected function response($dataResponse, $code = 200)
+    protected function response($dataResponse = array(), $code = 200)
     {
         return response()->json($dataResponse, $code, []);
     }

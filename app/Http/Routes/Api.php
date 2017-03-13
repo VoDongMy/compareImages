@@ -50,7 +50,11 @@ Route::group(['prefix' => 'api/'], function() {
     */
     Route::group(['prefix' => 'version/1.0.1/', 'namespace' => 'Api', 'as' => 'api.version.1-0-1'], function() {
 
-        //
+        //Common API
         Route::get('/', 'Controller@getDescription');
+        Route::post('/file/upload-images', 'Controller@postUploadImages');
+
+        //User
+        Route::post('/user/signup', 'UserController@postSignup');
     });
 });

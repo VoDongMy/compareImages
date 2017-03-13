@@ -17,10 +17,12 @@ class Controller extends BaseController
         $res = ['status' => 200,
                 'messages' => 'request success',
                 'sever_name'=>'Batr', 
-                'version' => '1.0.1',
                 'language' => 'php',
                 'database' => 'mysql',
+                'version' => '',
                 'description' => ''];
         dd($res);        
     }
+
+
 }

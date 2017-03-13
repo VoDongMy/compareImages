@@ -1,13 +1,13 @@
 <?php
+
+namespace App\Http\Controllers\Api;
+
 /**
  * Created by PhpStorm.
  * User: tantq
  * Date: 23/11/2015
  * Time: 02:41
  */
-
-namespace App\Http\Controllers\Api;
-
 
 use App\Bids;
 use App\Items;
@@ -18,7 +18,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Facades\Image;
 
-class UserController extends BaseController{
+class UserController extends BaseController
+{
 
     public function postSignup(Request $request)
     {
