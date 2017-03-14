@@ -56,5 +56,7 @@ Route::group(['prefix' => 'api/'], function() {
 
         //User
         Route::post('/user/signup', 'UserController@postSignup');
+        Route::post('/user/update', 'UserController@postUpdate');
+
     });
 });

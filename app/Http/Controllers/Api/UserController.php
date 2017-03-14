@@ -33,36 +33,26 @@ class UserController extends BaseController
         $validator = Validator::make($request->all(), $rules);
         if ( $validator->passes() ) {
             $user = User::where('fb_id',$request->facebook_id)->first();
-            if($user)
-            {
-                $user->curr_lat  = $request->curr_lat;
-                $user->curr_long  = $request->curr_long;
-                /*$user->name = $request->name;
-                $user->gender = ucfirst($request->gender);
-                $user->location = $request->location?$request->location:$user->location ;
-                $user->phone = isset($request->phone)?$request->phone:$user->phone;
-                $user->dob = date('Y-m-d',strtotime($request->dob));*/
-                $user->save();
-            }else{
+            if(empty($user))
                 $user =  new User();
-                $user->fb_id = $request->facebook_id;
-                $user->name = $request->name;
-                $user->email =  $request->email;
-                $user->gender = ucfirst($request->gender);
-                $user->dob = date('Y-m-d',strtotime($request->dob));
-                $user->phone = isset($request->phone)?$request->phone:'N/A';
-                $user->profile_image = $request->url;
-                $user->curr_lat = $request->has('curr_lat')? $request->curr_lat:'';
-                $user->curr_long = $request->has('curr_long')? $request->curr_long:'';
-                $user->location = $request->location?$request->location:'N/A';
-                //$user->device_token = $request->has('device_token')? $request->device_token:'';
-                $user->save();
+            
+            $user->fb_id = $request->facebook_id;
+            $user->name = $request->name;
+            $user->email =  $request->email;
+            $user->status =  1;
+            $user->gender = ucfirst($request->gender);
+            $user->dob = date('Y-m-d',strtotime($request->dob));
+            $user->phone = isset($request->phone)?$request->phone:'N/A';
+            $user->profile_image = $request->url;
+            $user->curr_lat = $request->has('curr_lat')? $request->curr_lat : '';
+            $user->curr_long = $request->has('curr_long')? $request->curr_long : '';
+            $user->location = $request->location? $request->location : 'N/A';
+            $user->save();
 
-            }
-            $device_token = '';//$request->has('device_token')? $request['device_token'] : '';
+            $device_token = '';
             // get new token
             $token = $user->login($user->id);
-            if(!$token)
+            if(empty($token))
             {
                 $messages['error'] = 'User has been deleted.';
                 return response()->json([
@@ -71,26 +61,24 @@ class UserController extends BaseController
                 ], 200);
 
             }
-            $token->user = User::find($user->id);
-            return response()->json([
-                'status' => true,
-                'data'   => $token
-            ], 200);
-        }else{
-            foreach ($validator->messages()->toArray() as $key => $msg) {
-                $messages[$key] = reset($msg);
-            }
-
-            return response()->json([
-                'status' => false,
-                'data'   => $messages
-            ], 200);
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => $token
+                    ], 200);
         }
+            
+        return $this->response([
+                    'status_code' => 400,
+                    'messages'    => $validator->messages()->first(),
+                    'data'        => array()
+                    ], 401);
+
     }
 
     public function postUpdate(Request $request)
     {
-
+        echo json_encode($request->all());die;
         if ($request->has('key') )
         {
             $user = $this->user;
