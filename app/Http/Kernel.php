@@ -21,6 +21,25 @@ class Kernel extends HttpKernel
     ];
 
     /**
+     * The application's route middleware groups.
+     *
+     * @var array
+     */
+    protected $middlewareGroups = [
+        'web' => [
+            \App\Http\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \App\Http\Middleware\VerifyCsrfToken::class,
+        ],
+        'auth.api' => [
+            \App\Http\Middleware\ApiAuth::class,
+        ],
+        'auth.base.api' => [
+            \App\Http\Middleware\ApiAuthenticate::class,
+        ]
+    ];
+
+    /**
      * The application's route middleware.
      *
      * @var array
@@ -29,5 +48,9 @@ class Kernel extends HttpKernel
         'auth' => \App\Http\Middleware\Authenticate::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'auth.api' => \App\Http\Middleware\ApiAuth::class,
+        'auth.base.api' => \App\Http\Middleware\ApiAuthenticate::class,
+
+
     ];
 }

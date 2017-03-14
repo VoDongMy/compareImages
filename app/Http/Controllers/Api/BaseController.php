@@ -5,12 +5,23 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests;
+use App\Models\UserToken;
 
-class BaseController extends Controller
+abstract class BaseController extends Controller
 {
-    function __contruct()
+    protected $user;
+
+    protected $token;
+
+    public function __construct(Request $request)
     {
-        //
+        if ($request->header('User-Token')) {
+            $this->token = $token = UserToken::with('user')->where('key',$request->header('User-Token'))->first();
+            if ($token)
+                $this->user = $token->user;
+            else
+               $this->user = (object)['id' => 0]; 
+        }
     }
 
     /**

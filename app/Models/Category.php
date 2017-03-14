@@ -6,7 +6,7 @@
  * Time: 01:48
  */
 
-namespace App;
+namespace App\Models;
 
 
 use Illuminate\Database\Eloquent\Model;

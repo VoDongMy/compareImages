@@ -48,15 +48,18 @@ Route::group(['prefix' => 'api/'], function() {
     *  09/03/2017
     * 
     */
-    Route::group(['prefix' => 'version/1.0.1/', 'namespace' => 'Api', 'as' => 'api.version.1-0-1'], function() {
+    Route::group(['prefix' => 'version/1.0.1/', 'namespace' => 'Api', 'as' => 'api.version.1-0-1', 'middleware' => 'auth.api'], function() {
 
         //Common API
         Route::get('/', 'Controller@getDescription');
-        Route::post('/file/upload-images', 'Controller@postUploadImages');
+        
+        Route::group(['middleware' => 'auth.base.api'], function() {
+            Route::post('/file/upload-images', 'Controller@postUploadImages');
 
-        //User
-        Route::post('/user/signup', 'UserController@postSignup');
-        Route::post('/user/update', 'UserController@postUpdate');
+            //User
+            Route::post('/user/signup', 'UserController@postSignup');
+            Route::put('/user/update', 'UserController@putUpdate');
 
+        });
     });
 });

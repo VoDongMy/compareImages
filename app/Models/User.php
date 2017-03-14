@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
@@ -37,24 +37,16 @@ class User extends Model implements AuthenticatableContract,
      */
     //protected $hidden = ['password', 'remember_token'];
     public function login($user_id=null) {
-        $deleteToken = Token::where('user_id', '=', $user_id)
-            ->delete();
-
-        // delete all tokens have same given device_token
-        if ($user_id) {
-            Token::where('user_id', $user_id)->delete();
-        }
+        $token = '';
+        UserToken::where('user_id', '=', $user_id)->delete();
         $user = User::where('id',$user_id)->where('status',1)->first();
-        if($user){
-            $token               = Token::getInstance();
+        if ($user) {
+            $token               = UserToken::getInstance();
             $token->user_id      = $this->id;
             $token->device_token = '';
             $token->save();
-        }else{
-            $token = '';
+            $token->user = $user;
         }
-
-
         return $token;
     }
 }

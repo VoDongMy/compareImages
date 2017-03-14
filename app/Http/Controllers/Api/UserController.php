@@ -9,17 +9,20 @@ namespace App\Http\Controllers\Api;
  * Time: 02:41
  */
 
-use App\Bids;
-use App\Items;
-use App\Setting;
-use App\User;
-use App\Wishlists;
+use App\Models\Bids;
+use App\Models\Items;
+use App\Models\Setting;
+use App\Models\User;
+use App\Models\Wishlists;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Facades\Image;
 
 class UserController extends BaseController
 {
+    public function __construct(Request $request) {
+      parent::__construct($request);
+    }
 
     public function postSignup(Request $request)
     {
@@ -76,79 +79,48 @@ class UserController extends BaseController
 
     }
 
-    public function postUpdate(Request $request)
+    public function putUpdate(Request $request)
     {
-        echo json_encode($request->all());die;
-        if ($request->has('key') )
-        {
-            $user = $this->user;
-            if(!$user)
-            {
-                $messages['error'] = 'User token is invalid.';
+        
+        $rules = [
+            'name'      => 'required',
+            'gender'        => 'required|in:male,female',
+            'dob'              =>'date',
+            'phone'         =>'required',
+            'location'         =>'required',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->passes()) {
+            $user = User::find($this->user->id);
+            if (empty($user))
                 return response()->json([
-                    'status' => false,
-                    'data'   => $messages
-                ], 200);
-            }
-            $rules = [
-                'name'      => 'required',
-                'gender'        => 'required|in:male,female',
-                'dob'              =>'date',
-                'phone'         =>'required',
-                'location'         =>'required',
-            ];
+                    'status_code' => 401,
+                    'messages'    => 'Unauthorized',
+                    'data'        => array()
+                    ],401);
 
-            $validator = Validator::make($request->all(), $rules);
-            if ( $validator->passes() ) {
-                $user->name = $request->name;
-                //$user->email =  $request->email;
-                $user->gender = ucfirst($request->gender);
-                $user->dob = date('Y-m-d',strtotime($request->dob));
-                $destinationPath = env('UPLOAD_PATH');
-                /*$str_data = base64_decode($request->avatar);*/
-                $fileName =  date('YmdHis') . "-" . rand(100000, 999999) . "-" . rand(100000, 999999) . '.' .
-                    $request->file('avatar')->getClientOriginalExtension();
+            $user->name = $request->name;
+            $user->gender = ucfirst($request->gender);
+            $user->dob = date('Y-m-d',strtotime($request->dob));
+            $user->profile_image = $request->avatar;
+            $user->phone = $request->phone;
+            $user->location = $request->location;
+            $user->save();
 
-                $request->file('avatar')->move($destinationPath, $fileName);
-                $image = $destinationPath . $fileName;
-                /*file_put_contents($image, $str_data);*/
-                $img = Image::make($image)->orientate();
-                $img->resize(520, null, function ($constraint) {
-                    $constraint->aspectRatio();
-                });
-                $img->save($image);
-                if(file_exists($user->profile_image))
-                {
-                    unlink($user->profile_image);
+            //$user->login($request->key);
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => $user
+                    ], 200);
 
-                }
-                $user->profile_image = "http://".$_SERVER['HTTP_HOST'].'/'.$image;
-                $user->phone = $request->phone?$request->phone:'N/A';
-                $user->location = $request->location?$request->location:'N/A';
-                $user->save();
-                $token = $this->token;//$user->login($request->key);
-                $token->user = User::find($user->id);
-                return response()->json([
-                    'status' => true,
-                    'data'   => $token
-                ], 200);
-
-            }
-            foreach ($validator->messages()->toArray() as $key => $msg) {
-                $messages[$key] = reset($msg);
-            }
-
-            return response()->json([
-                'status' => false,
-                'data'   => $messages
-            ], 200);
-        }else{
-            $messages['error'] = 'Key token is required.';
-            return response()->json([
-                'status' => false,
-                'data'   => $messages
-            ], 200);
         }
+        return $this->response([
+                    'status_code' => 400,
+                    'messages'    => $validator->messages()->first(),
+                    'data'        => array()
+                    ], 400);
     }
 
     public function add_wishlist(Request $request)
