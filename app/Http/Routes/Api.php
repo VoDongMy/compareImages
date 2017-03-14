@@ -53,11 +53,14 @@ Route::group(['prefix' => 'api/'], function() {
         //Common API
         Route::get('/', 'Controller@getDescription');
         
+        //User
+        Route::post('/user/signup', 'UserController@postSignup');
+        
+        //Group Athenticate
         Route::group(['middleware' => 'auth.base.api'], function() {
             Route::post('/file/upload-images', 'Controller@postUploadImages');
 
             //User
-            Route::post('/user/signup', 'UserController@postSignup');
             Route::put('/user/update', 'UserController@putUpdate');
 
         });
