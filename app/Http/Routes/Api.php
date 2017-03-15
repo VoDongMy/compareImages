@@ -62,6 +62,8 @@ Route::group(['prefix' => 'api/'], function() {
 
             //User
             Route::put('/user/update', 'UserController@putUpdate');
+            Route::put('/user/setting', 'UserController@setting');
+            Route::delete('/user/delete/{id}', 'UserController@deleteAccount');
 
         });
     });

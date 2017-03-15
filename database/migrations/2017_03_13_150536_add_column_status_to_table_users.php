@@ -18,7 +18,7 @@ class AddColumnStatusToTableUsers extends Migration
             {
                 if (!Schema::hasColumn('users', 'status'))
                 {
-                    $table->integer('status')->default(0)->after('phone');
+                    $table->integer('status')->default(1)->after('phone');
                 }
             });
         }

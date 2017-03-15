@@ -42,7 +42,6 @@ class UserController extends BaseController
             $user->fb_id = $request->facebook_id;
             $user->name = $request->name;
             $user->email =  $request->email;
-            $user->status =  1;
             $user->gender = ucfirst($request->gender);
             $user->dob = date('Y-m-d',strtotime($request->dob));
             $user->phone = isset($request->phone)?$request->phone:'N/A';
@@ -57,11 +56,11 @@ class UserController extends BaseController
             $token = $user->login($user->id);
             if(empty($token))
             {
-                $messages['error'] = 'User has been deleted.';
-                return response()->json([
-                    'status' => false,
-                    'data'   =>$messages
-                ], 200);
+                return $this->response([
+                    'status_code' => 400,
+                    'messages'    =>  'User has been deleted.',
+                    'data'        => array()
+                    ], 401);
 
             }
             return $this->response([
@@ -304,66 +303,45 @@ class UserController extends BaseController
 
     public function setting(Request $request)
     {
-        if ($request->has('key') )
-        {
+
+        $rules = [
+            'notify'      => 'required|in:0,1',
+            'distance'    => 'required',
+            'low_price'   => 'required',
+            'high_price'  => 'required'
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->passes() ) {
             $user = $this->user;
-            if(!$user)
-            {
-                $messages['error'] = 'User token is invalid.';
+            if (empty($user))
                 return response()->json([
-                    'status' => false,
-                    'data'   => $messages
-                ], 200);
-            }
-            $rules = [
-                'notify'      => 'required',
-                'distance'        => 'required',
-                'low_price'              =>'required',
-                'high_price'              =>'required'
-            ];
+                    'status_code' => 401,
+                    'messages'    => 'Unauthorized',
+                    'data'        => array()
+                    ],401);
 
-            $validator = Validator::make($request->all(), $rules);
-            if ( $validator->passes() ) {
-                $setting = Setting::where('user_id',$user->id)->first();
-                if($setting)
-                {
-                    $setting->notify = $request->notify;
-                    $setting->distance = $request->distance;
-                    $setting->low_price = $request->low_price;
-                    $setting->high_price = $request->high_price;
-                    $setting->save();
-                }else
-                {
-                    $setting = new Setting();
-                    $setting->user_id = $user->id;
-                    $setting->notify = $request->notify;
-                    $setting->distance = $request->distance;
-                    $setting->low_price = $request->low_price;
-                    $setting->high_price = $request->high_price;
-                    $setting->save();
-                }
-                $user = $this->user;
-                $user['setting'] = $setting;
-                return response()->json([
-                    'status' => true,
-                    'data'   => $user
-                ], 200); ;
-            }
-            foreach ($validator->messages()->toArray() as $key => $msg) {
-                $messages[$key] = reset($msg);
-            }
-
-            return response()->json([
-                'status' => false,
-                'data'   => $messages
-            ], 200);
+            $setting = Setting::where('user_id',$user->id)->first();
+            if (empty($setting))
+                $setting = new Setting();
+            $setting->user_id = $user->id;
+            $setting->notify = $request->notify;
+            $setting->distance = $request->distance;
+            $setting->low_price = $request->low_price;
+            $setting->high_price = $request->high_price;
+            $setting->save();
+            
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => $setting
+                    ], 200);
         }
-
-        $messages['error'] = 'User not found.';
-            return response()->json([
-                'status' => false,
-                'data'   => $messages
-            ], 200);
+        return $this->response([
+                'status_code' => 400,
+                'messages'    => $validator->messages()->first(),
+                'data'        => array()
+                ], 400);    
     }
 
     public function get_my_bids(Request $request)
@@ -409,34 +387,36 @@ class UserController extends BaseController
         ], 200); ;
     }
 
-    public function delete_account(Request $request)
+    public function deleteAccount($id, Request $request)
     {
-        if ($request->has('key') )
-        {
-            $user = $this->user;
-            if(!$user)
-            {
-                $messages['error'] = 'User token is invalid.';
+        $rules = [
+            'id'      => 'required'
+        ];
+
+        $validator = Validator::make(['id' => $id], $rules);
+        if ($validator->passes()) {
+            $user = User::find($this->user->id);
+            if (empty($user))
                 return response()->json([
-                    'status' => false,
-                    'data'   => $messages
-                ], 200);
-            }
+                    'status_code' => 401,
+                    'messages'    => 'Unauthorized',
+                    'data'        => array()
+                    ],401);
+
             $user->status = 0;
             $user->save();
             $token = $this->token;
             $token->delete();
-            $messages['error'] = 'User has been delete.';
-            return response()->json([
-                'status' => true,
-                'data'   => $messages
-            ], 200);
-        }
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => $user
+                    ], 200);        }
 
-        $messages['error'] = 'User not found.';
-        return response()->json([
-            'status' => false,
-            'data'   => $messages
-        ], 200);
+        return $this->response([
+                    'status_code' => 400,
+                    'messages'    => $validator->messages()->first(),
+                    'data'        => array()
+                    ], 400);
     }
 } 
