@@ -26,9 +26,17 @@ class ItemController extends Controller{
     public function __construct(Request $request) {
         parent::__construct($request);
     }
-    public function get_categoies(Request $request)
+
+    public function getCategoies(Request $request)
     {
-        if ($request->has('key') ) {
+        $rules = [
+            'limit' => 'regex:/^[0-9]+$/',
+            'page' => 'regex:/^[0-9]+$/',
+            'order_by' => 'in:asc,desc',
+        ];
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->passes()) {
+            $orderBy = $request->has('order_by')? $request->limit : 'asc';
             $user = $this->user;
             if (!$user) {
                 $messages['error'] = 'User token is invalid.';
@@ -37,27 +45,21 @@ class ItemController extends Controller{
                     'data' => $messages
                 ], 200);
             }
-            $categories = Category::orderBy('created_at', 'ASC')->get(array('id', 'name'));
-            if ($categories) {
-                return response()->json([
-                    'status' => true,
-                    'data' => $categories
-                ], 200);
-
-            } else {
-                $messages['error'] = 'User not found.';
-                return response()->json([
-                    'status' => false,
-                    'data' => $messages
-                ], 200);
-            }
+            $categories = Category::orderBy('created_at', $orderBy);
+            
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'    => (object)['total' => $categories->count(), 'items' => $categories->get()],
+                    ], 200);
         }
-        $messages['error'] = 'User not found.';
-        return response()->json([
-            'status' => false,
-            'data'   => $messages
-        ], 200);
+        return $this->response([
+                    'status_code' => 400,
+                    'messages'    => $validator->messages()->first(),
+                    'data'        => array()
+                    ], 400);    
     }
+
     public function show(Request $request)
     {
         if ($request->has('key') )

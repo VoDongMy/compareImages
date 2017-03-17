@@ -2,47 +2,51 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Category;
+use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
-class CategoryController extends Controller
+class CategoryController extends BaseController
 {
+    public function __construct(Request $request) {
+      parent::__construct($request);
+    }
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function getCategoies(Request $request)
     {
-        if ($request->has('key') ) {
+        $rules = [
+            'limit' => 'regex:/^[0-9]+$/',
+            'page' => 'regex:/^[0-9]+$/',
+            'order_by' => 'in:asc,desc',
+        ];
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->passes()) {
+            $orderBy = $request->has('order_by')? $request->limit : 'asc';
             $user = $this->user;
-            if (!$user) {
+            if (empty($user)) {
                 $messages['error'] = 'User token is invalid.';
                 return response()->json([
                     'status' => false,
                     'data' => $messages
                 ], 200);
             }
-            $categories = Category::orderBy('created_at', 'ASC')->get(array('id', 'name'));
-            if ($categories) {
-                return response()->json([
-                    'status' => true,
-                    'data' => $categories
-                ], 200);
-
-            } else {
-                $messages['error'] = 'User not found.';
-                return response()->json([
-                    'status' => false,
-                    'data' => $messages
-                ], 200);
-            }
+            $categories = Category::orderBy('created_at', $orderBy);
+            
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => (object)['total' => $categories->count(), 'items' => $categories->get()]
+                    ], 200);
         }
-        $messages['error'] = 'User not found.';
-        return response()->json([
-            'status' => false,
-            'data'   => $messages
-        ], 200); ;
+        return $this->response([
+                    'status_code' => 400,
+                    'messages'    => $validator->messages()->first(),
+                    'data'        => array()
+                    ], 400);    
     }
 
     /**
@@ -50,9 +54,38 @@ class CategoryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function postCreate(Request $request)
     {
-        //
+        $rules = [
+            'name' => 'required|alpha',        
+            ];
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->passes()) {
+            $orderBy = $request->has('order_by')? $request->limit : 'asc';
+            $user = $this->user;
+            if (empty($user)) {
+                $messages['error'] = 'User token is invalid.';
+                return response()->json([
+                    'status' => false,
+                    'data' => $messages
+                ], 200);
+            }
+            $category = new Category;
+            $category->name = $request->name;
+            $category->user_id = $user->id;
+            $category->save();
+            
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => $category
+                    ], 200);
+        }
+        return $this->response([
+                    'status_code' => 400,
+                    'messages'    => $validator->messages()->first(),
+                    'data'        => array()
+                    ], 400);    
     }
 
     /**

@@ -122,6 +122,93 @@ class UserController extends BaseController
                     ], 400);
     }
 
+    public function deleteAccount($id, Request $request)
+    {
+        $rules = [
+            'id'      => 'required'
+        ];
+
+        $validator = Validator::make(['id' => $id], $rules);
+        if ($validator->passes()) {
+            $user = User::find($this->user->id);
+            if (empty($user))
+                return response()->json([
+                    'status_code' => 401,
+                    'messages'    => 'Unauthorized',
+                    'data'        => array()
+                    ],401);
+
+            $user->status = 0;
+            $user->save();
+            $token = $this->token;
+            $token->delete();
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => $user
+                    ], 200);        
+        }
+        return $this->response([
+                    'status_code' => 400,
+                    'messages'    => $validator->messages()->first(),
+                    'data'        => array()
+                    ], 400);
+    }
+
+    public function getMyBids(Request $request)
+    {
+        $rules = [
+            'limit' => 'regex:/^[0-9]+$/',
+            'page' => 'regex:/^[0-9]+$/',
+            'order_by' => 'in:asc,desc',
+        ];
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->passes()) {
+            $limit = $request->has('limit')? $request->limit : 0;
+            $page = $request->has('page')? $request->limit : 1;
+            $orderBy = $request->has('order_by')? $request->limit : 'asc';
+            $user = User::find($this->user->id);    
+            if (empty($user))
+                return response()->json([
+                    'status_code' => 401,
+                    'messages'    => 'Unauthorized',
+                    'data'        => array()
+                    ],401);
+
+            $bids = Items::with('pictures','category')
+                ->join('bids', 'bids.item_id', '=', 'items.id')
+                ->where('bids.user_id',$user->id);
+
+            // paging data
+            $total = $bids->count();
+            $maxPage = ceil($total / $limit);
+            $skip = $limit*((int)$page-1);
+
+            if ((int)$request->input('limit')<=0) {
+                $limit = 0;
+                $maxPage = $page = 1;
+                $response = $bids->orderBy('bids.created_at', $orderBy)->get();
+            } else {
+                $response = $bids->take((int)$limit)->skip($skip)->orderBy('bids.created_at', $orderBy)->get();
+            }
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => (object)['total' => $total,
+                                            'limit' => $limit,
+                                            'page' => $page,
+                                            'max_page' => $maxPage,
+                                            'user' => $user,
+                                            'items' => $response]
+                                            ], 200);     
+        }
+        return $this->response([
+                    'status_code' => 400,
+                    'messages'    => $validator->messages()->first(),
+                    'data'        => array()
+                    ], 400);   
+    }
+
     public function add_wishlist(Request $request)
     {
         if ($request->has('key') )
@@ -344,79 +431,5 @@ class UserController extends BaseController
                 ], 400);    
     }
 
-    public function get_my_bids(Request $request)
-    {
-        if ($request->has('key') ) {
-            $user = $this->user;
-            if (!$user) {
-                $messages['error'] = 'User token is invalid.';
-                return response()->json([
-                    'status' => true,
-                    'data' => $messages
-                ], 200);
-            }
-            $page  = $request->has('page')?$request->page:1;
-            //$bids = Bids::with('item','user')->where('user_id',$user->id)->orderBy('created_at','DESC')->take(15)->get();
-            $bids = Items::with('user','pictures','category','user')
-                ->join('bids', 'bids.item_id', '=', 'items.id')
-                ->select(array('items.*'))
-                ->where('bids.user_id',$user->id)
-                ->orderBy('bids.created_at', 'DESC')
-                ->skip(($page-1)*10)
-                ->take(10)
-                ->get();
-            $nextPage = Items::with('user','pictures','category','user')
-                ->join('bids', 'bids.item_id', '=', 'items.id')
-                ->select(array('items.*'))
-                ->where('bids.user_id',$user->id)
-                ->orderBy('bids.created_at', 'DESC')
-                ->skip($page*10)
-                ->take(10)
-                ->get();
-            return response()->json([
-                'status' => true,
-                'data'   => $bids,
-                'next_page' => count($nextPage) ? true : false
-            ], 200); ;
-        }
 
-        $messages['error'] = 'User not found.';
-        return response()->json([
-            'status' => false,
-            'data'   => $messages
-        ], 200); ;
-    }
-
-    public function deleteAccount($id, Request $request)
-    {
-        $rules = [
-            'id'      => 'required'
-        ];
-
-        $validator = Validator::make(['id' => $id], $rules);
-        if ($validator->passes()) {
-            $user = User::find($this->user->id);
-            if (empty($user))
-                return response()->json([
-                    'status_code' => 401,
-                    'messages'    => 'Unauthorized',
-                    'data'        => array()
-                    ],401);
-
-            $user->status = 0;
-            $user->save();
-            $token = $this->token;
-            $token->delete();
-            return $this->response([
-                    'status_code' => 200,
-                    'messages'    => 'request success',
-                    'data'        => $user
-                    ], 200);        }
-
-        return $this->response([
-                    'status_code' => 400,
-                    'messages'    => $validator->messages()->first(),
-                    'data'        => array()
-                    ], 400);
-    }
 } 

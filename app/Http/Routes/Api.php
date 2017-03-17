@@ -20,7 +20,7 @@ Route::group(['prefix' => 'api/'], function() {
         Route::post('delete', 'UserController@delete_account');
         Route::post('my_bids', 'UserController@get_my_bids');
 
-
+        //
         Route::post('wishlist', 'UserController@wishlist');
         Route::post('wishlist/add', 'UserController@add_wishlist');
         Route::post('wishlist/remove', 'UserController@remove_wishlist');
@@ -64,6 +64,11 @@ Route::group(['prefix' => 'api/'], function() {
             Route::put('/user/update', 'UserController@putUpdate');
             Route::put('/user/setting', 'UserController@setting');
             Route::delete('/user/delete/{id}', 'UserController@deleteAccount');
+            Route::get('/user/my-bids', 'UserController@getMyBids');
+
+            //Items
+            Route::get('/categories', 'CategoryController@getCategoies');
+            Route::post('/category/create', 'CategoryController@postCreate');
 
         });
     });
