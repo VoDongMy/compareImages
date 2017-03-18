@@ -52,18 +52,21 @@ class Controller extends BaseController
                 $directory = 'data/'.$user->id.'/images/'.date('Y/m/d');
                 Upload::findOrCreateFolder($directory);
                 foreach ($request->images as $key => $image) {
+                    $filePath = Upload::uploadFile($image,$directory,md5(microtime()).'.'.$image->getClientOriginalName());
                     $picture = new Pictures;
-                    $picture->url = Upload::uploadFile($image,$directory,md5(microtime()).'.'.$image->getClientOriginalName());
-                    $picture->thumbnail = Upload::cropImages($image,$directory,md5(microtime()).'_100_100.'.$image->getClientOriginalName(),100,100);
-                    $picture->size = filesize($image);
+                    $picture->url = $filePath;
+                    $picture->thumbnail = Upload::cropImages($filePath,$directory,md5(microtime()).'_100_100.'.$image->getClientOriginalName(),100,100, $fit = null);
+                    $picture->size = filesize($filePath);
                     $picture->item_id = 0;
-                    $picture->save();                     }
-                $dataResponse = ['total'  => count($dataImages), 
-                                'items'     => $dataImages = 1];
+                    $picture->save();    
+                    $dataPicture[] = $picture;            
+                }
+                
                 return $this->response([
                         'status_code' => 200,
                         'messages'    => 'request success',
-                        'data'        => $dataResponse
+                        'data'        => ['total'  => count($dataPicture), 
+                                'items'     => $dataPicture]
                         ], 200);               
             }
         }
