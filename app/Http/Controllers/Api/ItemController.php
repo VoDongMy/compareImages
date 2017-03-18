@@ -9,26 +9,26 @@
 namespace App\Http\Controllers\Api;
 
 
-use App\Bids;
-use App\Category;
-use App\Items;
-use App\Likes;
-use App\Pictures;
-use App\User;
+use App\Models\Bids;
+use App\Models\Category;
+use App\Models\Items;
+use App\Models\Likes;
+use App\Models\Pictures;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Facades\Image;
 
 
-class ItemController extends Controller{
+class ItemController extends BaseController{
 
     public function __construct(Request $request) {
         parent::__construct($request);
     }
 
-    public function getCategoies(Request $request)
-    {
+    public function getlistItem(Request $request)
+    {   
         $rules = [
             'limit' => 'regex:/^[0-9]+$/',
             'page' => 'regex:/^[0-9]+$/',
@@ -36,29 +36,158 @@ class ItemController extends Controller{
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->passes()) {
-            $orderBy = $request->has('order_by')? $request->limit : 'asc';
+            $limit = $request->has('limit')? $request->limit : 0;
+            $page = $request->has('page')? $request->page : 1;
+            $orderBy = $request->has('order_by')? $request->order_by : 'asc';
             $user = $this->user;
-            if (!$user) {
-                $messages['error'] = 'User token is invalid.';
+            if(empty($user))
                 return response()->json([
-                    'status' => false,
-                    'data' => $messages
-                ], 200);
+                    'status_code' => 401,
+                    'messages'    => 'Unauthorized',
+                    'data'        => array()
+                    ],401);            
+            $page  = $request->has('page')?$request->page:1;
+            $items = Items::with('pictures','category')
+                ->leftJoin('users', 'users.id', '=', 'items.user_id')
+                ->select(array('items.*'))
+                ->where('users.id',$user->id);
+
+            $total = $items->count();
+
+            if ((int)$request->input('limit')<=0) {
+                $limit = 0;
+                $maxPage = $page = 1;
+                $response = $items->orderBy('items.created_at', $orderBy)->get();
+            } else {
+                // paging data
+                $maxPage = ceil($total / $limit);
+                $skip = $limit*((int)$page-1);
+                $response = $items->take((int)$limit)->skip($skip)->orderBy('items.created_at', $orderBy)->get();
             }
-            $categories = Category::orderBy('created_at', $orderBy);
-            
             return $this->response([
                     'status_code' => 200,
                     'messages'    => 'request success',
-                    'data'    => (object)['total' => $categories->count(), 'items' => $categories->get()],
-                    ], 200);
+                    'data'        => (object)['total' => $total,
+                                            'limit' => $limit,
+                                            'page' => $page,
+                                            'max_page' => $maxPage,
+                                            'user' => $user,
+                                            'items' => $response]
+                                            ], 200); 
         }
         return $this->response([
                     'status_code' => 400,
                     'messages'    => $validator->messages()->first(),
                     'data'        => array()
-                    ], 400);    
+                    ], 400);
     }
+
+
+    public function postCreateItem(Request $request)
+    {
+        $rules = [
+            'title'      => 'required',
+            'description'      => 'required',
+            'price'     =>'required',
+            'images.*'      =>'',//, 'max:200px'
+        ];
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->passes() ) {
+            $user = $this->user;
+            if( empty($user))
+                return response()->json([
+                        'status_code' => 401,
+                        'messages'    => 'Unauthorized',
+                        'data'        => array()
+                        ],401); 
+            $item = new Items();
+            $item->title = $request['title'];
+            $item->description = $request['description'];
+            $item->price = $request['price'];
+            $item->user_id  = $user->id;
+            $item->cat_id  = $request['cat_id'];
+            $item->save();
+            if($request->has('images'))
+            {
+                $picture = new Pictures();
+                $picture->url = "http://".$_SERVER['HTTP_HOST'].'/'.$image;
+                $picture->item_id = $item->id;
+                $picture->save();
+
+            }
+            $items = Items::with('pictures','category')->where('id',$item->id)->first();
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => $items], 200); 
+        }
+        foreach ($validator->messages()->toArray() as $key => $msg) {
+            $messages[$key] = reset($msg);
+        }
+
+        return response()->json([
+            'status' => false,
+            'data'   => $messages
+        ], 200);
+    }
+
+    public function putUpdateItem($id, Request $request)
+    {
+        $rules = [
+            'title'      => 'required',
+            'description'      => 'required',
+            'price'     =>'required',
+            'images.*'      =>'',//, 'max:200px'
+        ];
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->passes() ) {
+            $item = Items::find($id);
+            if( empty($item))
+                return response()->json([
+                        'status_code' => 400,
+                        'messages'    => 'Item not found.',
+                        'data'        => array()
+                        ],400); 
+            $user = $this->user;
+            if( empty($user))
+                return response()->json([
+                        'status_code' => 401,
+                        'messages'    => 'Unauthorized',
+                        'data'        => array()
+                        ],401); 
+            $item->title = $request['title'];
+            $item->description = $request['description'];
+            $item->price = $request['price'];
+            $item->user_id  = $user->id;
+            $item->cat_id  = $request['cat_id'];
+            $item->save();
+            Pictures::where('item_id',$id)->delete();
+            if($request->has('images'))
+            {
+                $picture = new Pictures();
+                $picture->url = "http://".$_SERVER['HTTP_HOST'].'/'.$image;
+                $picture->item_id = $item->id;
+                $picture->save();
+
+            }
+            $items = Items::with('pictures','category')->where('id',$item->id)->first();
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => $items], 200); 
+        }
+        foreach ($validator->messages()->toArray() as $key => $msg) {
+            $messages[$key] = reset($msg);
+        }
+
+        return response()->json([
+            'status' => false,
+            'data'   => $messages
+        ], 200);
+    }
+
+
+    //
 
     public function show(Request $request)
     {
@@ -385,8 +514,8 @@ class ItemController extends Controller{
                 'data'   => $messages
             ], 200); ;
         }
-
     }
+
     public function remove_item(Request $request)
     {
         if ($request->has('key') )
@@ -422,9 +551,8 @@ class ItemController extends Controller{
                 'data'   => $messages
             ], 200); ;
         }
-
-
     }
+
     public function bidding_item(Request $request)
     {
         if ($request->has('key') ) {
@@ -534,6 +662,7 @@ class ItemController extends Controller{
             'data'   => $messages
         ], 200); ;
     }
+
     public function like_item(Request $request)
     {
         if ($request->has('key') ) {
@@ -586,6 +715,7 @@ class ItemController extends Controller{
             'data'   => $messages
         ], 200);
     }
+
     public function dislike_item(Request $request)
     {
         if ($request->has('key') ) {
@@ -638,6 +768,7 @@ class ItemController extends Controller{
             'data'   => $messages
         ], 200);
     }
+
     public function update_status_bid(Request $request)
     {
         if ($request->has('key') ) {
@@ -670,6 +801,5 @@ class ItemController extends Controller{
             'status' => false,
             'data'   => $messages
         ], 200); ;
-
     }
 } 

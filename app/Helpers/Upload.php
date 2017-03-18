@@ -86,7 +86,7 @@ class Upload {
 
     public static function cropImages($file,$uploadPath,$fileName,$h,$w)
     {
-        $image = \Image::make($file->getRealPath())->resize(320, 240)->resize($thumbnailSize)->save($uploadPath.'/'.$fileName);
+        $image = \Image::make($file->getRealPath())->resize($h, $w)->->save($uploadPath.'/'.$fileName);
     }
 
     public static function findOrCreateFolder($path)

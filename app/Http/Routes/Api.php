@@ -66,10 +66,15 @@ Route::group(['prefix' => 'api/'], function() {
             Route::delete('/user/delete/{id}', 'UserController@deleteAccount');
             Route::get('/user/my-bids', 'UserController@getMyBids');
 
-            //Items
+            //Category
             Route::get('/categories', 'CategoryController@getCategoies');
             Route::post('/category/create', 'CategoryController@postCreate');
+            Route::put('/category/update/{id}', 'CategoryController@putUpdateCreate');
 
+            //Item
+            Route::get('/item/lists', 'ItemController@getlistItem');
+            Route::post('/item/create', 'ItemController@postCreateItem');
+            Route::put('/item/update/{id}', 'ItemController@putUpdateItem');
         });
     });
 });

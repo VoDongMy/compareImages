@@ -57,11 +57,15 @@ class CategoryController extends BaseController
     public function postCreate(Request $request)
     {
         $rules = [
-            'name' => 'required|alpha',        
+            'name' => 'required',        
+            'parent_id' => 'regex:/^[0-9]+$/',
+            'ordering' =>  'regex:/^[0-9]+$/'     
             ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->passes()) {
             $orderBy = $request->has('order_by')? $request->limit : 'asc';
+            $parentId = $request->has('parent_id')? $request->parent_id : 0;
+            $ordering = $request->has('ordering')? $request->ordering : 0;
             $user = $this->user;
             if (empty($user)) {
                 $messages['error'] = 'User token is invalid.';
@@ -73,6 +77,60 @@ class CategoryController extends BaseController
             $category = new Category;
             $category->name = $request->name;
             $category->user_id = $user->id;
+            $category->parent_id = $parentId;
+            $category->position = $ordering;
+            $category->save();
+            
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => $category
+                    ], 200);
+        }
+        return $this->response([
+                    'status_code' => 400,
+                    'messages'    => $validator->messages()->first(),
+                    'data'        => array()
+                    ], 400);    
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function putUpdateCreate($id, Request $request)
+    {
+        $rules = [
+            'name' => 'required',        
+            'parent_id' => 'regex:/^[0-9]+$/',
+            'ordering' =>  'regex:/^[0-9]+$/'     
+            ];
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->passes()) {
+            $category = Category::find($id);
+            if (empty($category)) {
+                $messages['category'] = 'Category not found.';
+                return response()->json([
+                    'status' => false,
+                    'data' => $messages
+                ], 200);
+            }
+            $orderBy = $request->has('order_by')? $request->limit : 'asc';
+            $parentId = $request->has('parent_id')? $request->parent_id : 0;
+            $ordering = $request->has('ordering')? $request->ordering : 0;
+            $user = $this->user;
+            if (empty($user)) {
+                $messages['error'] = 'User token is invalid.';
+                return response()->json([
+                    'status' => false,
+                    'data' => $messages
+                ], 200);
+            }
+            $category->name = $request->name;
+            $category->user_id = $user->id;
+            $category->parent_id = $parentId;
+            $category->position = $ordering;
             $category->save();
             
             return $this->response([

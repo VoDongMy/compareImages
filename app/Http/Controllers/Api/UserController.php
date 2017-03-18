@@ -165,8 +165,8 @@ class UserController extends BaseController
         $validator = Validator::make($request->all(), $rules);
         if ($validator->passes()) {
             $limit = $request->has('limit')? $request->limit : 0;
-            $page = $request->has('page')? $request->limit : 1;
-            $orderBy = $request->has('order_by')? $request->limit : 'asc';
+            $page = $request->has('page')? $request->page : 1;
+            $orderBy = $request->has('order_by')? $request->order_by : 'asc';
             $user = User::find($this->user->id);    
             if (empty($user))
                 return response()->json([
@@ -181,14 +181,14 @@ class UserController extends BaseController
 
             // paging data
             $total = $bids->count();
-            $maxPage = ceil($total / $limit);
-            $skip = $limit*((int)$page-1);
 
             if ((int)$request->input('limit')<=0) {
                 $limit = 0;
                 $maxPage = $page = 1;
                 $response = $bids->orderBy('bids.created_at', $orderBy)->get();
             } else {
+                $maxPage = ceil($total / $limit);
+                $skip = $limit*((int)$page-1);
                 $response = $bids->take((int)$limit)->skip($skip)->orderBy('bids.created_at', $orderBy)->get();
             }
             return $this->response([
