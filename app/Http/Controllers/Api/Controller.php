@@ -58,6 +58,7 @@ class Controller extends BaseController
                     $picture->thumbnail = Upload::cropImages($filePath,$directory,md5(microtime()).'_100_100.'.$image->getClientOriginalName(),100,100, $fit = null);
                     $picture->size = filesize($filePath);
                     $picture->item_id = 0;
+                    $picture->user_id = $user->id;
                     $picture->save();    
                     $dataPicture[] = $picture;            
                 }

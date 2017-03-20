@@ -72,9 +72,11 @@ Route::group(['prefix' => 'api/'], function() {
             Route::put('/category/update/{id}', 'CategoryController@putUpdateCreate');
 
             //Item
-            Route::get('/item/lists', 'ItemController@getlistItem');
+            Route::get('/item/my-lists', 'ItemController@getlistMyItem');
             Route::post('/item/create', 'ItemController@postCreateItem');
             Route::put('/item/update/{id}', 'ItemController@putUpdateItem');
+            Route::put('/item/like-unlike/{id}', 'ItemController@putLikeItem');
+            Route::get('/item/lists', 'ItemController@getlistItem');
         });
     });
 });

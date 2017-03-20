@@ -13,14 +13,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Likes extends Model {
 
-    protected $table = 'item_likes';
+    protected $table = 'likeable';
 
     public function user() {
         return $this->belongsTo('App\User');
     }
 
-    public function item() {
-        return $this->belongsTo('App\Items');
+    public function items()
+    {
+        return $this->morphedByMany('App\Models\Items', 'taggable');
     }
 
 } 

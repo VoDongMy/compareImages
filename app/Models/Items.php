@@ -34,4 +34,9 @@ class Items extends Model {
     {
         return $this->hasMany('App\Models\Pictures','item_id');
     }
+    
+    public function likes()
+    {
+        return $this->morphToMany('App\Models\likes', 'likeable');
+    }
 } 
