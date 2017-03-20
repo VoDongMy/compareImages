@@ -75,7 +75,6 @@ class UserController extends BaseController
                     'messages'    => $validator->messages()->first(),
                     'data'        => array()
                     ], 401);
-
     }
 
     public function putUpdate(Request $request)
@@ -153,6 +152,26 @@ class UserController extends BaseController
                     'messages'    => $validator->messages()->first(),
                     'data'        => array()
                     ], 400);
+    }
+
+    public function getSignout(Request $request)
+    {
+        
+        $user = User::find($this->user->id);
+        if (empty($user))
+            return response()->json([
+                'status_code' => 401,
+                'messages'    => 'Unauthorized',
+                'data'        => array()
+                ],401);
+
+        $user->logout($user->id);
+        return $this->response([
+                'status_code' => 200,
+                'messages'    => 'request success',
+                'data'        => (object)[]
+                ], 200);        
+        
     }
 
     public function getMyBids(Request $request)

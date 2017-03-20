@@ -298,7 +298,6 @@ class ItemController extends BaseController{
                         'messages'    => 'Item not found.',
                         'data'        => array()
                         ],400); 
-            $user = $this->user;
             $like = Likes::where('like_id',$id)->where('like_type','item');
             if(empty($like->where('user_id',$user->id)->first()))
             {
@@ -326,7 +325,38 @@ class ItemController extends BaseController{
                     ], 400);
     }
 
-
+    public function getItemDetail($id)
+    { 
+        $rules = [
+                'id'     =>'regex:/^[0-9]+$/'
+            ];
+        $validator = Validator::make(['id'=>$id], $rules);
+        if ($validator->passes()) {
+            $user = $this->user;
+            if( empty($user))
+                return response()->json([
+                        'status_code' => 401,
+                        'messages'    => 'Unauthorized',
+                        'data'        => array()
+                        ],401); 
+            $item = Items::with('pictures','category','user')->find($id);
+            if( empty($item))
+                return response()->json([
+                        'status_code' => 400,
+                        'messages'    => 'Item not found.',
+                        'data'        => array()
+                        ],400); 
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => $item], 200); 
+        }
+        return $this->response([
+                    'status_code' => 400,
+                    'messages'    => $validator->messages()->first(),
+                    'data'        => array()
+                    ], 400);
+    }
 
     //
     public function show(Request $request)

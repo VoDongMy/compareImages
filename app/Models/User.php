@@ -49,4 +49,9 @@ class User extends Model implements AuthenticatableContract,
         }
         return $token;
     }
+
+    public function logout($userId = 0) {
+        UserToken::where('user_id', '=', $userId)->delete();
+        return true;
+    }
 }

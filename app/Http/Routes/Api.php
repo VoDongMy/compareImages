@@ -54,7 +54,7 @@ Route::group(['prefix' => 'api/'], function() {
         Route::get('/', 'Controller@getDescription');
         
         //User
-        Route::post('/user/signup', 'UserController@postSignup');
+        Route::post('/user/sign-up', 'UserController@postSignup');
         
         //Group Athenticate
         Route::group(['middleware' => 'auth.base.api'], function() {
@@ -62,6 +62,7 @@ Route::group(['prefix' => 'api/'], function() {
 
             //User
             Route::put('/user/update', 'UserController@putUpdate');
+            Route::get('/user/sign-out', 'UserController@getSignout');
             Route::put('/user/setting', 'UserController@setting');
             Route::delete('/user/delete/{id}', 'UserController@deleteAccount');
             Route::get('/user/my-bids', 'UserController@getMyBids');
@@ -72,6 +73,7 @@ Route::group(['prefix' => 'api/'], function() {
             Route::put('/category/update/{id}', 'CategoryController@putUpdateCreate');
 
             //Item
+            Route::get('/item/detail/{id}', 'ItemController@getItemDetail');
             Route::get('/item/my-lists', 'ItemController@getlistMyItem');
             Route::post('/item/create', 'ItemController@postCreateItem');
             Route::put('/item/update/{id}', 'ItemController@putUpdateItem');
