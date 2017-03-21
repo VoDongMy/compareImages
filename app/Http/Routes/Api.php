@@ -79,6 +79,10 @@ Route::group(['prefix' => 'api/'], function() {
             Route::put('/item/update/{id}', 'ItemController@putUpdateItem');
             Route::put('/item/like-unlike/{id}', 'ItemController@putLikeItem');
             Route::get('/item/lists', 'ItemController@getlistItem');
+
+            //History
+            Route::get('/history/{type}', 'HistoryController@getHistories');
+            Route::put('/history/put-history/{type}', 'HistoryController@putHistories');
         });
     });
 });

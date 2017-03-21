@@ -13,6 +13,7 @@ use App\Models\Bids;
 use App\Models\Category;
 use App\Models\Items;
 use App\Models\Likes;
+use App\Models\History;
 use App\Models\Pictures;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -85,17 +86,14 @@ class ItemController extends BaseController{
     public function getlistItem(Request $request)
     {   
         $rules = [
-            'item_id' => 'regex:/^[0-9]+$/',
-            'direction' => 'required|regex:/^[+-]?[0-9]+$/',
+            // 'item_id' => 'regex:/^[0-9]+$/',
+            'quantity' => 'required|regex:/^[+-]?[0-9]+$/',
             'keyword' => '',
             'cat_id' => 'regex:/^[0-9]+$/',
             'order_by' => 'in:asc,desc',
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->passes()) {
-            $item_id = $request->has('item_id')? $request->item_id : 0;
-            $direction = $request->has('direction') && $request->direction != 0? $request->direction : 15;
-            $orderBy = $request->has('order_by')? $request->order_by : 'asc';
             $user = $this->user;
             if(empty($user))
                 return response()->json([
@@ -103,6 +101,10 @@ class ItemController extends BaseController{
                     'messages'    => 'Unauthorized',
                     'data'        => array()
                     ],401);            
+            $historyItem = History::where('user_id',$user->id)->where('history_type','item')->first();
+            $item_id = empty($historyItem->history->reading_item_id)? 0 : $historyItem->history->reading_item_id;
+            $direction = $request->has('quantity') && $request->quantity != 0? $request->quantity : 15;
+            $orderBy = $request->has('order_by')? $request->order_by : 'asc';
             $page  = $request->has('page')?$request->page:1;
             $items = Items::with('pictures','category','user')
                     ->select(array('items.*'));
