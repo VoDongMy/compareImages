@@ -77,7 +77,8 @@ Route::group(['prefix' => 'api/'], function() {
             Route::get('/item/my-lists', 'ItemController@getlistMyItem');
             Route::post('/item/create', 'ItemController@postCreateItem');
             Route::put('/item/update/{id}', 'ItemController@putUpdateItem');
-            Route::put('/item/like-unlike/{id}', 'ItemController@putLikeItem');
+            Route::put('/item/like/{id}', 'ItemController@putLikeItem');
+            Route::put('/item/unlike/{id}', 'ItemController@putUnLikeItem');
             Route::get('/item/lists', 'ItemController@getlistItem');
 
             //History

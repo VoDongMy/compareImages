@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Exception;
+use App\Helpers\DataLog;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -42,10 +43,32 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $e)
     {
-        if ($e instanceof ModelNotFoundException) {
-            $e = new NotFoundHttpException($e->getMessage(), $e);
-        }
+        public function render($request, Exception $e)
+    {
+        $url = $request->url();
+        $data = [
+            'URL' => $url,
+            'File' => $e->getFile(),
+            'Line' => $e->getLine(),
+            'Message' => $e->getMessage()
+        ];
+        var_dump('expression');die;
+        DataLog::logPublic('exception.log', $data, false);
 
+        if (strpos($url, '/api/version/')) {
+
+            // Log error
+            return response()->json([
+                    'status_code' => 500,
+                    'messages'    => 'server error',
+                    // 'data'        => (object)['total' => $total,
+                    //                         'limit' => $limit,
+                    //                         'page' => $page,
+                    //                         'max_page' => $maxPage,
+                    //                         'items' => $response]
+                                            ], 400);
+        }
         return parent::render($request, $e);
+    }
     }
 }

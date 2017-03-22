@@ -46,7 +46,7 @@ class HistoryController extends BaseController {
 	        return $this->response([
 	                    'status_code' => 200,
 	                    'messages'    => 'request success',
-	                    'data'        => ['user' => $user, 'history_item' => $data->history]], 200);
+	                    'data'        => ['user' => $user, 'history_item' => empty($data)? (object)[] : $data->history]], 200);
 	    }
 	    return $this->response([
                     'status_code' => 400,

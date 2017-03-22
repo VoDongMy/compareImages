@@ -20,6 +20,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Facades\Image;
+use App\Helpers\DataLog;
+
 
 
 class ItemController extends BaseController{
@@ -151,7 +153,6 @@ class ItemController extends BaseController{
                                             'limit' => $limit,
                                             'page' => $page,
                                             'max_page' => $maxPage,
-                                            'user' => $user,
                                             'items' => $response]
                                             ], 200); 
         }
@@ -278,6 +279,47 @@ class ItemController extends BaseController{
                     ], 400);
     }
 
+    public function putUnLikeItem($id, Request $request)
+    { 
+        $rules = [
+                'id'     =>'regex:/^[0-9]+$/'
+            ];
+        $validator = Validator::make(['id'=>$id], $rules);
+        if ($validator->passes()) {
+            $user = $this->user;
+            if( empty($user))
+                return response()->json([
+                        'status_code' => 401,
+                        'messages'    => 'Unauthorized',
+                        'data'        => array()
+                        ],401); 
+            $item = Items::find($id);
+            if( empty($item))
+                return response()->json([
+                        'status_code' => 400,
+                        'messages'    => 'Item not found.',
+                        'data'        => array()
+                        ],400); 
+            $history = History::where('user_id',$user->id)->where('history_type','item')->first();
+            $dataObject = ['reading_item_id'=> $item->id];
+            if (empty($history))
+                $history = new History;
+                $history->history_type = 'item';
+                $history->history = json_encode((object)$dataObject);
+                $history->user_id = $user->id;
+                $history->save();
+            
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => $item], 200); 
+        }
+        return $this->response([
+                    'status_code' => 400,
+                    'messages'    => $validator->messages()->first(),
+                    'data'        => array()
+                    ], 400);
+    }
 
     public function putLikeItem($id, Request $request)
     { 
