@@ -42,11 +42,12 @@ class Controller extends BaseController
         if ($validator->passes()) {
             $user = $this->user;
             if (empty($user)) {
-                $messages['error'] = 'User token is invalid.';
                 return response()->json([
-                    'status' => false,
-                    'data' => $messages
-                ], 200);
+                        'status_code' => 401,
+                        'messages'    => 'User token is invalid.',
+                        'data'        => array()
+                        ],401); 
+
             }
             if (is_array($request->images)) {
                 $directory = 'data/'.$user->id.'/images/'.date('Y/m/d');

@@ -16,7 +16,7 @@ class CreateTableLikeable extends Migration
             $table->increments('id');
             $table->integer('user_id');
             $table->integer('like_id');
-            $table->integer('like_type');
+            $table->string('like_type',25);
             $table->softDeletes();
             $table->timestamps();
         });

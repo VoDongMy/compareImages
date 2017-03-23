@@ -54,4 +54,14 @@ class User extends Model implements AuthenticatableContract,
         UserToken::where('user_id', '=', $userId)->delete();
         return true;
     }
+
+    public function likes()
+    {
+        return $this->morphToMany('App\Models\Likes', 'likeable');
+    }
+
+    public function watchs()
+    {
+        return $this->morphToMany('App\Models\Watch', 'watchable');
+    }
 }

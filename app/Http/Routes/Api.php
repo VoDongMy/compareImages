@@ -77,13 +77,22 @@ Route::group(['prefix' => 'api/'], function() {
             Route::get('/item/my-lists', 'ItemController@getlistMyItem');
             Route::post('/item/create', 'ItemController@postCreateItem');
             Route::put('/item/update/{id}', 'ItemController@putUpdateItem');
+            Route::delete('/item/delete/{id}', 'ItemController@deleteRemoveItem');
+            Route::get('/item/lists', 'ItemController@getlistItem');
+            //like/unlike
             Route::put('/item/like/{id}', 'ItemController@putLikeItem');
             Route::put('/item/unlike/{id}', 'ItemController@putUnLikeItem');
-            Route::get('/item/lists', 'ItemController@getlistItem');
+            //watch/disWatch
+            Route::get('/item/watch-lists', 'ItemController@getWatchlistItem');
+            Route::put('/item/watch/{id}', 'ItemController@putWatchItem');
+            Route::put('/item/diswatch/{id}', 'ItemController@putUnWatchItem');
 
             //History
             Route::get('/history/{type}', 'HistoryController@getHistories');
             Route::put('/history/put-history/{type}', 'HistoryController@putHistories');
+
+            //Bidding
+            Route::post('/item/bidding/{id}', 'ItemController@postBiddingItem');
         });
     });
 });

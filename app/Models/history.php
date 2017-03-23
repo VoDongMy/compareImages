@@ -28,4 +28,22 @@ class History extends Model {
     {
         return empty($value)? (object)[] : json_decode($value) ;
     }
+
+    public function putHistories($userId, $value = array(), $historyType)
+    {
+        $history = History::where('user_id',$userId)->where('history_type','item')->first();
+        if (empty($history)){
+            $history = new History;
+            $history->history = json_encode((object)$value);
+        } else {
+            $dataObject = $history->history;
+            $history->history = json_encode(array_merge((array)$dataObject, $value));
+        }
+        $history->history_type = $historyType;
+        $history->user_id = $userId;
+        return $history->save();
+    }
+
+
+
 } 

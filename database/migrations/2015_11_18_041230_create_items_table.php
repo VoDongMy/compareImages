@@ -15,10 +15,10 @@ class CreateItemsTable extends Migration
         Schema::create('items', function (Blueprint $table) {
             $table->increments('id');
             $table->string('title');
-            $table->string('description');
+            $table->string('descript');
             $table->integer('cat_id')->unsigned();;
             $table->integer('user_id')->unsigned();;
-            $table->decimal('price');
+            $table->string('price',15);
             $table->integer('like_count');
             $table->integer('dislike_count');
             $table->integer('is_exchange');

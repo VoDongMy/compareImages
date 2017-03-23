@@ -43,8 +43,6 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $e)
     {
-        public function render($request, Exception $e)
-    {
         $url = $request->url();
         $data = [
             'URL' => $url,
@@ -52,23 +50,31 @@ class Handler extends ExceptionHandler
             'Line' => $e->getLine(),
             'Message' => $e->getMessage()
         ];
-        var_dump('expression');die;
-        DataLog::logPublic('exception.log', $data, false);
+        // DataLog::logPublic('exception.log', $data, false);
 
+        // if (strpos($url, '/api/version/')) {
+
+        //     // Log error
+        //     return response()->json([
+        //             'status_code' => 500,
+        //             'messages'    => 'server error',
+        //                                     ], 400);
+        // }
+        // return parent::render($request, $e);
+        if ($e instanceof ModelNotFoundException) {
+            $e = new NotFoundHttpException($e->getMessage(), $e);
+        }
         if (strpos($url, '/api/version/')) {
 
             // Log error
             return response()->json([
                     'status_code' => 500,
                     'messages'    => 'server error',
-                    // 'data'        => (object)['total' => $total,
-                    //                         'limit' => $limit,
-                    //                         'page' => $page,
-                    //                         'max_page' => $maxPage,
-                    //                         'items' => $response]
-                                            ], 400);
+                    'data'        =>  $data   ], 400);
         }
         return parent::render($request, $e);
-    }
+
+        return parent::render($request, $e);
+
     }
 }

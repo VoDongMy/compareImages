@@ -38,5 +38,10 @@ class Items extends Model {
     public function likes()
     {
         return $this->morphToMany('App\Models\likes', 'likeable');
+    }   
+
+    public function watchs()
+    {
+        return $this->morphToMany('App\Models\Watchs', 'watchable');
     }
 } 

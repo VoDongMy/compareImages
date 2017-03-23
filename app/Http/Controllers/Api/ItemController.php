@@ -16,6 +16,7 @@ use App\Models\Likes;
 use App\Models\History;
 use App\Models\Pictures;
 use App\Models\User;
+use App\Models\Watch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -26,8 +27,13 @@ use App\Helpers\DataLog;
 
 class ItemController extends BaseController{
 
-    public function __construct(Request $request) {
+    private $items;
+    private $history;
+
+    public function __construct(Request $request, Items $items, History $history) {
         parent::__construct($request);
+        $this->items = $items;
+        $this->history = $history;
     }
 
     public function getlistMyItem(Request $request)
@@ -113,7 +119,7 @@ class ItemController extends BaseController{
             if ($request->has('keyword')) 
                 $items = $items->where(function ($query) use ($request){
                         $query->where('title', 'like', '%' . $request->keyword . '%')
-                              ->orWhere('description', 'like', '%' . $request->keyword . '%')
+                              ->orWhere('descript', 'like', '%' . $request->keyword . '%')
                               ->orWhere('price', 'like', '%' . $request->keyword . '%')
                               ->orWhere('created_at', 'like', '%' . $request->keyword . '%');
                     });
@@ -167,7 +173,7 @@ class ItemController extends BaseController{
     {
         $rules = [
             'title'      => 'required',
-            'description'      => 'required',
+            'descript'      => 'required',
             'cat_id'     =>'required|regex:/^[0-9]+$/',
             'price'     =>'required',
             'status'     =>'regex:/^[0-9]$/',
@@ -184,7 +190,7 @@ class ItemController extends BaseController{
                         ],401); 
             $item = new Items();
             $item->title = $request['title'];
-            $item->description = $request['description'];
+            $item->descript = $request['descript'];
             $item->price = $request['price'];
             $item->user_id  = $user->id;
             $item->cat_id  = $request['cat_id'];
@@ -217,13 +223,14 @@ class ItemController extends BaseController{
     public function putUpdateItem($id, Request $request)
     {
         $rules = [
+            'id'      => 'required|regex:/^[0-9]+$/',
             'title'      => 'required',
-            'description'      => 'required',
+            'descript'      => 'required',
             'status'     =>'regex:/^[0-9]$/',
             'price'     =>'required',
             'images.*'      =>'',//, 'max:200px'
         ];
-        $validator = Validator::make($request->all(), $rules);
+        $validator = Validator::make(array_merge($request->all(),['id'=>$id]), $rules);
         if ( $validator->passes() ) {
             $user = $this->user;
             if( empty($user))
@@ -240,7 +247,7 @@ class ItemController extends BaseController{
                         'data'        => array()
                         ],400); 
             $item->title = $request['title'];
-            $item->description = $request['description'];
+            $item->descript = $request['descript'];
             $item->price = $request['price'];
             $item->user_id  = $user->id;
             $item->cat_id  = $request['cat_id'];
@@ -269,8 +276,39 @@ class ItemController extends BaseController{
                     'messages'    => 'request success',
                     'data'        => $items], 200); 
         }
-        foreach ($validator->messages()->toArray() as $key => $msg) {
-            $messages[$key] = reset($msg);
+        return $this->response([
+                    'status_code' => 400,
+                    'messages'    => $validator->messages()->first(),
+                    'data'        => array()
+                    ], 400);
+    }
+
+    public function deleteRemoveItem($id, Request $request)
+    {
+        $rules = [
+            'id'      => 'required|regex:/^[0-9]+$/'
+            ];
+        $validator = Validator::make(array_merge($request->all(),['id'=>$id]), $rules);
+        if ( $validator->passes() ) {
+            $user = $this->user;
+            if( empty($user))
+                return response()->json([
+                        'status_code' => 401,
+                        'messages'    => 'Unauthorized',
+                        'data'        => array()
+                        ],401); 
+            $item = Items::where('user_id',$user->id)->find($id);
+            if( empty($item))
+                return response()->json([
+                        'status_code' => 400,
+                        'messages'    => 'Item not found.',
+                        'data'        => array()
+                        ],400); 
+            $item->delete();
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => (object)['remove item'=>true]], 200); 
         }
         return $this->response([
                     'status_code' => 400,
@@ -278,6 +316,47 @@ class ItemController extends BaseController{
                     'data'        => array()
                     ], 400);
     }
+
+    public function putUnWatchItem($id, Request $request)
+    { 
+        $rules = [
+                'id'     =>'regex:/^[0-9]+$/'
+            ];
+        $validator = Validator::make(['id'=>$id], $rules);
+        if ($validator->passes()) {
+            $user = $this->user;
+            if( empty($user))
+                return response()->json([
+                        'status_code' => 401,
+                        'messages'    => 'Unauthorized',
+                        'data'        => array()
+                        ],401); 
+            $item = Items::find($id);
+            if( empty($item))
+                return response()->json([
+                        'status_code' => 400,
+                        'messages'    => 'Item not found.',
+                        'data'        => array()
+                        ],400);
+            $watch = Watch::where('watch_id',$id)->where('watch_type','item')->where('user_id',$user->id)->first();
+            if(!empty($watch))
+            { 
+                $watch->delete();
+            } else {
+                $this->history->putHistories($user->id,["reading_item_id" => $item->id], $historyType = 'item');
+            }
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => $item], 200); 
+        }
+        return $this->response([
+                    'status_code' => 400,
+                    'messages'    => $validator->messages()->first(),
+                    'data'        => array()
+                    ], 400);
+    }
+
 
     public function putUnLikeItem($id, Request $request)
     { 
@@ -300,15 +379,15 @@ class ItemController extends BaseController{
                         'messages'    => 'Item not found.',
                         'data'        => array()
                         ],400); 
-            $history = History::where('user_id',$user->id)->where('history_type','item')->first();
-            $dataObject = ['reading_item_id'=> $item->id];
-            if (empty($history))
-                $history = new History;
-                $history->history_type = 'item';
-                $history->history = json_encode((object)$dataObject);
-                $history->user_id = $user->id;
-                $history->save();
-            
+            $like = Likes::where('like_id',$id)->where('like_type','item')->where('user_id',$user->id)->first();
+            if(!empty($like))
+            {
+                $like->delete();    
+            } else {
+                $this->history->putHistories($user->id,["reading_item_id" => $item->id], $historyType = 'item');
+            }
+            $item->dislike_count = (int)$item->dislike_count + 1;
+            $item->save();
             return $this->response([
                     'status_code' => 200,
                     'messages'    => 'request success',
@@ -342,6 +421,7 @@ class ItemController extends BaseController{
                         'messages'    => 'Item not found.',
                         'data'        => array()
                         ],400); 
+            $this->history->putHistories($user->id,["reading_item_id" => $item->id], $historyType = 'item');
             $like = Likes::where('like_id',$id)->where('like_type','item');
             if(empty($like->where('user_id',$user->id)->first()))
             {
@@ -350,10 +430,6 @@ class ItemController extends BaseController{
                 $like->like_id = $id;
                 $like->like_type = 'item';
                 $like->save();
-                $item->like_count = count($like->lists('id')->toArray());
-                $item->save();
-            }else{
-                $like->delete();
                 $item->like_count = count($like->lists('id')->toArray());
                 $item->save();     
             }
@@ -367,6 +443,86 @@ class ItemController extends BaseController{
                     'messages'    => $validator->messages()->first(),
                     'data'        => array()
                     ], 400);
+    }
+
+    public function putWatchItem($id, Request $request)
+    { 
+        $rules = [
+                'id'     =>'regex:/^[0-9]+$/'
+            ];
+        $validator = Validator::make(['id'=>$id], $rules);
+        if ($validator->passes()) {
+            $user = $this->user;
+            if( empty($user))
+                return response()->json([
+                        'status_code' => 401,
+                        'messages'    => 'Unauthorized',
+                        'data'        => array()
+                        ],401); 
+            $item = Items::find($id);
+            if( empty($item))
+                return response()->json([
+                        'status_code' => 400,
+                        'messages'    => 'Item not found.',
+                        'data'        => array()
+                        ],400); 
+            $this->history->putHistories($user->id,["reading_item_id" => $item->id], $historyType = 'item');
+            $watch = Watch::where('watch_id',$id)->where('watch_type','item');
+            if(empty($watch->where('user_id',$user->id)->first()))
+            {
+                $watch = new Watch;
+                $watch->user_id = $user->id;
+                $watch->watch_id = $id;
+                $watch->watch_type = 'item';
+                $watch->save(); 
+            }
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => $item], 200); 
+        }
+        return $this->response([
+                    'status_code' => 400,
+                    'messages'    => $validator->messages()->first(),
+                    'data'        => array()
+                    ], 400);
+    }
+
+    public function getWatchlistItem(Request $request)
+    { 
+        // $rules = [
+        //         'id'     =>'regex:/^[0-9]+$/'
+        //     ];
+        // $validator = Validator::make(['id'=>$id], $rules);
+        // if ($validator->passes()) {
+            $user = $this->user;
+            if( empty($user))
+                return response()->json([
+                        'status_code' => 401,
+                        'messages'    => 'Unauthorized',
+                        'data'        => array()
+                        ],401); 
+            $items = Items::leftJoin('watchable', function ($join) use ($user) {
+                        $join->on('watchable.watch_id', '=', 'items.id')
+                             ->where('watchable.user_id', '=', $user->id)
+                             ->where('watchable.watch_type', '=', 'item');
+                    })->get();
+            if( empty($items))
+                return response()->json([
+                        'status_code' => 400,
+                        'messages'    => 'Item not found.',
+                        'data'        => array()
+                        ],400); 
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => $items], 200); 
+        // }
+        // return $this->response([
+        //             'status_code' => 400,
+        //             'messages'    => $validator->messages()->first(),
+        //             'data'        => array()
+        //             ], 400);
     }
 
     public function getItemDetail($id)
@@ -390,6 +546,7 @@ class ItemController extends BaseController{
                         'messages'    => 'Item not found.',
                         'data'        => array()
                         ],400); 
+            $this->history->putHistories($user->id,["reading_item_id" => $item->id], $historyType = 'item');
             return $this->response([
                     'status_code' => 200,
                     'messages'    => 'request success',
@@ -401,6 +558,46 @@ class ItemController extends BaseController{
                     'data'        => array()
                     ], 400);
     }
+
+    public function postBiddingItem($id, Request $request)
+    {
+        $rules = [
+                'id'=>'required|regex:/^[0-9]+$/',
+                'price' => 'required|regex:/^[0-9]+$/',
+        ];
+        $validator = Validator::make(array_merge($request->all(),['id'=>$id]), $rules);
+        if ( $validator->passes() ) {
+            $user = $this->user;
+            $item = Items::find($id);
+            if( empty($item))
+                return $this->response([
+                        'status_code' => 400,
+                        'messages'    => 'Item not found.',
+                        'data'        => array()
+                        ],400); 
+            $bid = Bids::where('user_id',$user->id)->where('item_id',$id)->first();
+            if(empty($bid))
+                $bid = new Bids();
+            $bid->user_id = $user->id;
+            $bid->item_id = $id;
+            $bid->price_bidding = $request->price;
+            $bid->status = 0;
+            $bid->save();
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => $item], 200);
+        }
+        return response()->json([
+            'status' => false,
+            'data'   => $validator->messages()->first()
+        ], 200);
+
+    }
+
+
+
+
 
     //
     public function show(Request $request)
@@ -671,7 +868,7 @@ class ItemController extends BaseController{
             }
             $rules = [
                 'title'      => 'required',
-                'description'      => 'required',
+                'descript'      => 'required',
                 'price'     =>'required',
                 'image_1'      =>array('required', 'mimes:jpeg,jpg,png'),//, 'max:200px'
             ];
@@ -680,7 +877,7 @@ class ItemController extends BaseController{
 
                 $item = new Items();
                 $item->title = $request['title'];
-                $item->descript = $request['description'];
+                $item->descript = $request['descript'];
                 $item->price = $request['price'];
                 $item->user_id  = $user->id;
                 $item->cat_id  = $request['cat_id'];
