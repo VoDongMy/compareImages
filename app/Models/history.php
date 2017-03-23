@@ -44,6 +44,4 @@ class History extends Model {
         return $history->save();
     }
 
-
-
 } 
