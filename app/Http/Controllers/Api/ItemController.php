@@ -502,7 +502,7 @@ class ItemController extends BaseController{
                         'messages'    => 'Unauthorized',
                         'data'        => array()
                         ],401); 
-            $items = Items::leftJoin('watchable', function ($join) use ($user) {
+            $items = Items::join('watchable', function ($join) use ($user) {
                         $join->on('watchable.watch_id', '=', 'items.id')
                              ->where('watchable.user_id', '=', $user->id)
                              ->where('watchable.watch_type', '=', 'item');
