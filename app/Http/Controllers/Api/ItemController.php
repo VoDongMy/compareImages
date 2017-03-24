@@ -488,7 +488,7 @@ class ItemController extends BaseController{
                     ], 400);
     }
 
-    public function getWatchlistItem(Request $request)
+    public function getLikelistItems(Request $request)
     { 
         // $rules = [
         //         'id'     =>'regex:/^[0-9]+$/'
@@ -502,7 +502,44 @@ class ItemController extends BaseController{
                         'messages'    => 'Unauthorized',
                         'data'        => array()
                         ],401); 
-            $items = Items::join('watchable', function ($join) use ($user) {
+            $items = Items::select('items.*')->join('likeable', function ($join) use ($user) {
+                        $join->on('likeable.like_id', '=', 'items.id')
+                             ->where('likeable.user_id', '=', $user->id)
+                             ->where('likeable.like_type', '=', 'item');
+                    })->get();
+            if( empty($items))
+                return response()->json([
+                        'status_code' => 400,
+                        'messages'    => 'Item not found.',
+                        'data'        => array()
+                        ],400); 
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => $items], 200); 
+        // }
+        // return $this->response([
+        //             'status_code' => 400,
+        //             'messages'    => $validator->messages()->first(),
+        //             'data'        => array()
+        //             ], 400);
+    }
+
+    public function getWatchlistItems(Request $request)
+    { 
+        // $rules = [
+        //         'id'     =>'regex:/^[0-9]+$/'
+        //     ];
+        // $validator = Validator::make(['id'=>$id], $rules);
+        // if ($validator->passes()) {
+            $user = $this->user;
+            if( empty($user))
+                return response()->json([
+                        'status_code' => 401,
+                        'messages'    => 'Unauthorized',
+                        'data'        => array()
+                        ],401); 
+            $items = Items::select('items.*')->join('watchable', function ($join) use ($user) {
                         $join->on('watchable.watch_id', '=', 'items.id')
                              ->where('watchable.user_id', '=', $user->id)
                              ->where('watchable.watch_type', '=', 'item');

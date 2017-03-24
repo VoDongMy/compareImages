@@ -80,10 +80,11 @@ Route::group(['prefix' => 'api/'], function() {
             Route::delete('/item/delete/{id}', 'ItemController@deleteRemoveItem');
             Route::get('/item/lists', 'ItemController@getlistItem');
             //like/unlike
+            Route::get('/item/like-lists', 'ItemController@getLikelistItems');
             Route::put('/item/like/{id}', 'ItemController@putLikeItem');
             Route::put('/item/unlike/{id}', 'ItemController@putUnLikeItem');
             //watch/disWatch
-            Route::get('/item/watch-lists', 'ItemController@getWatchlistItem');
+            Route::get('/item/watch-lists', 'ItemController@getWatchlistItems');
             Route::put('/item/watch/{id}', 'ItemController@putWatchItem');
             Route::put('/item/diswatch/{id}', 'ItemController@putUnWatchItem');
 
