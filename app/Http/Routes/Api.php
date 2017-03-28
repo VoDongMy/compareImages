@@ -94,6 +94,12 @@ Route::group(['prefix' => 'api/'], function() {
 
             //Bidding
             Route::post('/item/bidding/{id}', 'ItemController@postBiddingItem');
+
+            //Messages
+            Route::get('/messages/lists', 'Controller@getDescription');
+            Route::get('/messages/get/', 'Controller@getDescription');
+            Route::put('/messages/send/{id}', 'Controller@getDescription');
+
         });
     });
 });
