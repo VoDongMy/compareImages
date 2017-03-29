@@ -17,10 +17,21 @@ class Pictures extends Model {
 
     protected $fillable = ['item_id','url'];
 
+    public function getUrlAttribute($value)
+    {
+        return env('APP_URL') . '/' . $value;
+    }
+
+    public function getThumbnailAttribute($value)
+    {
+        return env('APP_URL') . '/' . $value;
+    }
 
     public function item() {
         return $this->belongsTo('App\Items');
     }
+
+
 
 
 } 
