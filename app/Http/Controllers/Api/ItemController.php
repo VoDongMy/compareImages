@@ -549,7 +549,7 @@ class ItemController extends BaseController{
                         $join->on('watchable.watch_id', '=', 'items.id')
                              ->where('watchable.user_id', '=', $user->id)
                              ->where('watchable.watch_type', '=', 'item');
-                    })->get();
+                    });
 
             $total = $items->count();
 
