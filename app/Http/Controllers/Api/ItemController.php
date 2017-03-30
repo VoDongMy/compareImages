@@ -527,39 +527,58 @@ class ItemController extends BaseController{
 
     public function getWatchlistItems(Request $request)
     { 
-        // $rules = [
-        //         'id'     =>'regex:/^[0-9]+$/'
-        //     ];
-        // $validator = Validator::make(['id'=>$id], $rules);
-        // if ($validator->passes()) {
+        $rules = [
+            'limit' => 'regex:/^[0-9]+$/',
+            'page' => 'regex:/^[0-9]+$/',
+            'order_by' => 'in:asc,desc',
+        ];
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->passes()) {
+            $limit = $request->has('limit')? $request->limit : 0;
+            $page = $request->has('page')? $request->page : 1;
+            $orderBy = $request->has('order_by')? $request->order_by : 'asc';
             $user = $this->user;
-            if( empty($user))
+            if(empty($user))
                 return response()->json([
-                        'status_code' => 401,
-                        'messages'    => 'Unauthorized',
-                        'data'        => array()
-                        ],401); 
+                    'status_code' => 401,
+                    'messages'    => 'Unauthorized',
+                    'data'        => array()
+                    ],401);            
+            $page  = $request->has('page')?$request->page:1;
             $items = Items::select('items.*')->join('watchable', function ($join) use ($user) {
                         $join->on('watchable.watch_id', '=', 'items.id')
                              ->where('watchable.user_id', '=', $user->id)
                              ->where('watchable.watch_type', '=', 'item');
                     })->get();
-            if( empty($items))
-                return response()->json([
-                        'status_code' => 400,
-                        'messages'    => 'Item not found.',
-                        'data'        => array()
-                        ],400); 
+
+            $total = $items->count();
+
+            if ((int)$request->input('limit')<=0) {
+                $limit = 0;
+                $maxPage = $page = 1;
+                $response = $items->orderBy('items.created_at', $orderBy)->get();
+            } else {
+                // paging data
+                $maxPage = ceil($total / $limit);
+                $skip = $limit*((int)$page-1);
+                $response = $items->take((int)$limit)->skip($skip)->orderBy('items.created_at', $orderBy)->get();
+            }
             return $this->response([
                     'status_code' => 200,
                     'messages'    => 'request success',
-                    'data'        => $items], 200); 
-        // }
-        // return $this->response([
-        //             'status_code' => 400,
-        //             'messages'    => $validator->messages()->first(),
-        //             'data'        => array()
-        //             ], 400);
+                    'data'        => (object)['total' => $total,
+                                            'limit' => $limit,
+                                            'page' => $page,
+                                            'max_page' => $maxPage,
+                                            'user' => $user,
+                                            'items' => $response]
+                                            ], 200); 
+        }
+        return $this->response([
+                    'status_code' => 400,
+                    'messages'    => $validator->messages()->first(),
+                    'data'        => array()
+                    ], 400);
     }
 
     public function getItemDetail($id)
@@ -1189,8 +1208,6 @@ class ItemController extends BaseController{
                 $like->save();
             }else{
                 $like = new Likes();
-                $like->user_id = $user->id;
-                $like->item_id = $request->item_id;
                 $like->dislike =$like->dislike+1;
                 $like->save();
             }
