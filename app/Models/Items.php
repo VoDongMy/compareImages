@@ -22,11 +22,27 @@ class Items extends Model {
      */
     protected $fillable = ['name','price'];
 
-    public function user() {
+    protected $appends = ['duration_posted', 'distance'];
+
+    public function user() 
+    {
         return $this->belongsTo('App\Models\User','user_id');
     }
 
-    public function category() {
+    public function getDistanceAttribute() 
+    {
+        // $geoCodeUser = getGeoCode($this->user->location);
+        // $latitudeFrom = $outputFrom->results[0]->geometry->location->lat;
+        // $longitudeFrom = $outputFrom->results[0]->geometry->location->lng;
+        return '1,6 km';
+    }
+    public function getDurationPostedAttribute() 
+    {
+        return  getDurationAgo( $this->created_at );
+    }
+
+    public function category() 
+    {
         return $this->belongsTo('App\Models\Category','cat_id');
     }
 
