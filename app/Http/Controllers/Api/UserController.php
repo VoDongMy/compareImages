@@ -44,7 +44,8 @@ class UserController extends BaseController
             $user->email =  $request->email;
             $user->gender = ucfirst($request->gender);
             $user->dob = date('Y-m-d',strtotime($request->dob));
-            $user->phone = isset($request->phone)?$request->phone:'N/A';
+            $user->phone = isset($request->phone)?$request->phone:'';
+            $user->udid = isset($request->udid)?$request->udid:'';
             $user->profile_image = $request->url;
             $user->curr_lat = $request->has('curr_lat')? $request->curr_lat : '';
             $user->curr_long = $request->has('curr_long')? $request->curr_long : '';
