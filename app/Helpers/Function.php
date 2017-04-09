@@ -77,9 +77,9 @@ function pushNotification($type = 0, $parameter = array('udid'=>''))
 
     // Provide the Host Information.
 
-    //$tHost = 'gateway.sandbox.push.apple.com';
+    $tHost = 'gateway.sandbox.push.apple.com';
 
-    $tHost = 'gateway.push.apple.com';
+    // $tHost = 'gateway.push.apple.com';
 
 
     $tPort = 2195;

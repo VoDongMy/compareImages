@@ -42,7 +42,7 @@ class UserController extends BaseController
             }
 
             // get new token
-            $token = $user->login($user->id, $parameter = array('udid'=>$request->udid, 'device_t'=>$request->device_type));
+            $token = $user->login($user->id, $parameter = array('udid'=>$request->udid, 'device_type'=>$request->device_type));
             if(empty($token))
             {
                 return $this->response([

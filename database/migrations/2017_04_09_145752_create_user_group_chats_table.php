@@ -12,7 +12,7 @@ class CreateUserGroupChatsTable extends Migration
      */
     public function up()
     {
-        Schema::create('group_chats', function (Blueprint $table) {
+        Schema::create('user_group_chats', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id');
             $table->string('group_chat_id');
