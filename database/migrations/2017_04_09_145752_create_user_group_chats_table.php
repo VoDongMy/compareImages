@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateNotificationsTable extends Migration
+class CreateUserGroupChatsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,12 +12,11 @@ class CreateNotificationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('notifications', function (Blueprint $table) {
+        Schema::create('group_chats', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('bid_id');
-            $table->integer('from_user_id');
-            $table->string('message');
-            $table->integer('is_read');
+            $table->integer('user_id');
+            $table->string('group_chat_id');
+            $table->string('descript');
             $table->softDeletes();
             $table->timestamps();
         });
@@ -30,6 +29,6 @@ class CreateNotificationsTable extends Migration
      */
     public function down()
     {
-        Schema::drop('notifications');
+        //
     }
 }

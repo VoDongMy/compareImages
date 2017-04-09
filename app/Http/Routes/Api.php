@@ -95,6 +95,10 @@ Route::group(['prefix' => 'api/'], function() {
             //Bidding
             Route::post('/item/bidding/{id}', 'ItemController@postBiddingItem');
 
+            //Notification
+            Route::get('/notifications', 'NotificationController@getNotify');
+            Route::put('/push-notification/{type}', 'NotificationController@putPushNotification');
+
             //Messages
             Route::get('/messages/lists', 'Controller@getDescription');
             Route::get('/messages/get/', 'Controller@getDescription');

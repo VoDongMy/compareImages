@@ -32,6 +32,6 @@ abstract class BaseController extends Controller
      */
     protected function response($dataResponse = array(), $code = 200)
     {
-        return response()->json($dataResponse, $code, []);
+        return response()->json($dataResponse, $code, [], JSON_NUMERIC_CHECK);
     }
 }
