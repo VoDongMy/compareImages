@@ -103,7 +103,7 @@ class UserController extends BaseController
             $user->name = $request->name;
             $user->gender = ucfirst($request->gender);
             $user->dob = date('Y-m-d',strtotime($request->dob));
-            $user->profile_image = $request->avatar;
+            $user->profile_image = $request->profile_image;
             $user->phone = $request->phone;
             $user->location = $request->location;
             $user->save();

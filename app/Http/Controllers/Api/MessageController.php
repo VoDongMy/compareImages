@@ -9,19 +9,23 @@ use App\Models\Likes;
 use App\Models\History;
 use App\Models\Pictures;
 use App\Models\User;
+use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Facades\Image;
 
 
-class NotificationController extends BaseController {
+class MessageController extends BaseController {
 
-    public function __construct(Request $request) {
+    protected $message;
+
+    public function __construct(Request $request, Message $message) {
         parent::__construct($request);
+        $this->message = $message;
     }
 
-    public function getNotify(Request $request)
+    public function getMessages(Request $request)
     {
         $rules = [
             // 'type'      => 'required|in:item'
@@ -54,13 +58,13 @@ class NotificationController extends BaseController {
                     ], 400);
     }
 
-    public function putPushNotification($type, Request $request)
+    public function postSendMessage($id, Request $request)
     {
         $rules = [
-            'type'      => 'required|in:0,1',
-            'udid'      => 'required'
+            'id'      => 'required|regex:/^([0-9]+,?)+$/',
+            'content'      => 'required'
         ];
-        $validator = Validator::make(array_merge($request->all(),['type' => $type]), $rules);
+        $validator = Validator::make(array_merge($request->all(),['id' => $id]), $rules);
         if ( $validator->passes() ) {
 	        $user = $this->user;
             if( empty($user))
@@ -69,10 +73,16 @@ class NotificationController extends BaseController {
                         'messages'    => 'Unauthorized',
                         'data'        => array()
                         ],401);
+            $data = (object)[];
+            try {
+                $this->message->sendMessageToUser($user->id, $parameter = ['toUserId' => $id, 'content' => $request->content]);
+            } catch (Exception $e) {
+                
+            }
 	        return $this->response([
 	                    'status_code' => 200,
 	                    'messages'    => 'request success',
-	                    'data'        => sendiOSNotification([$request->udid], $messages = $request->messages) ], 200);
+	                    'data'        => pushNotification($type, $parameter = ['udid'=>$request->udid]) ], 200);
 	    }
 	    return $this->response([
                     'status_code' => 400,

@@ -102,7 +102,7 @@ Route::group(['prefix' => 'api/'], function() {
             //Messages
             Route::get('/messages/lists', 'Controller@getDescription');
             Route::get('/messages/get/', 'Controller@getDescription');
-            Route::put('/messages/send/{id}', 'Controller@getDescription');
+            Route::post('/messages/send/{id}', 'MessageController@postSendMessage');
 
         });
     });
