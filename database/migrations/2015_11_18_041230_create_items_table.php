@@ -16,23 +16,14 @@ class CreateItemsTable extends Migration
             $table->increments('id');
             $table->string('title');
             $table->string('descript');
-            $table->integer('cat_id')->unsigned();;
-            $table->integer('user_id')->unsigned();;
+            $table->integer('cat_id');
+            $table->integer('user_id');
             $table->string('price',15);
             $table->integer('like_count');
             $table->integer('dislike_count');
             $table->integer('is_exchange');
             $table->softDeletes();
             $table->timestamps();
-
-            $table->foreign('user_id')
-                ->references('id')
-                ->on('users')
-                ->onDelete('cascade');
-            $table->foreign('cat_id')
-                ->references('id')
-                ->on('categories')
-                ->onDelete('cascade');
 
         });
     }
