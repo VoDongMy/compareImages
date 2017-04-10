@@ -101,7 +101,7 @@ class UserController extends BaseController
                     ],401);
 
             $user->name = $request->name;
-            $user->gender = ucfirst($request->gender);
+            $user->gender = $request->gender;
             $user->dob = date('Y-m-d',strtotime($request->dob));
             $user->profile_image = $request->profile_image;
             $user->phone = $request->phone;
