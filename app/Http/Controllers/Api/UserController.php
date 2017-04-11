@@ -20,11 +20,11 @@ use Intervention\Image\Facades\Image;
 
 class UserController extends BaseController
 {
-    protected $user;
+    protected $userModel;
 
-    public function __construct(Request $request, User $user) {
+    public function __construct(Request $request, User $userModel) {
       parent::__construct($request);
-      $this->user = $user;
+      $this->userModel = $userModel;
     }
 
     public function postSignup(Request $request)
@@ -48,7 +48,7 @@ class UserController extends BaseController
             }
 
             // get new token
-            $token = $this->user->login($user->id, $parameter = array('udid'=>$request->udid, 'device_type'=>$request->device_type));
+            $token = $this->userModel->login($user->id, $parameter = array('udid'=>$request->udid, 'device_type'=>$request->device_type));
             if(empty($token))
             {
                 return $this->response([
