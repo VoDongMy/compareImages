@@ -20,18 +20,53 @@ class Message extends Model {
         return $this->belongsTo('App\Models\User');
     }
 
+    public function groupChat() 
+    {
+        return $this->belongsTo('App\Models\GroupChat');
+    }
+
     public function sendMessageToUser($userId, $parameter = array('toUserId'=>0,'content'=>''))
     {
-        // var_dump($userId);die;
-        if (User::find($parameter['toUserId'])) {
-            $GroupChat = GroupChat::whereRaw( DB::raw(''))->where('type',0)->first();
-            var_dump($groupChat);die;
-            // if () {
-            //     # code...
-            // }
+        if ($toUser = User::find($parameter['toUserId'])) {
+            $myGroupChat = GroupChat::whereHas('userGroupChats', function ( $query ) use ($parameter) {
+                    return $query->where('user_id', $parameter['toUserId'] );
+                })->where('user_id', $userId )->where('object_type',0)->first();
+
+            $toGroupChat = GroupChat::whereHas('userGroupChats', function ( $query ) use ($userId) {
+                    return $query->where('user_id', $userId );
+                })->where('user_id', $parameter['toUserId'] )->where('object_type',0)->first();
+
+            $groupChat = empty($myGroupChat)? (empty($toGroupChat)? null : $toGroupChat) : $myGroupChat;
+
+            if (empty($groupChat)) {
+                $groupChat = new GroupChat;
+                $groupChat->user_id = $userId;
+                $groupChat->title = $toUser->name;
+                $groupChat->object_type = 0;
+                $groupChat->save();
+                $userGroupChat = new UserGroupChat;
+                $userGroupChat->group_chat_id = $groupChat->id;
+                $userGroupChat->user_id = $parameter['toUserId'];
+                $userGroupChat->save();
+            }
+            return $this->pushMessageToGroup($groupChat->id,['userId'=>$userId,'content'=>$parameter['content']]);
         }
         throw new Exception("sending user id does not exist", 400);
         return (object)[];
-        
     } 
+
+    public function pushMessageToGroup($id, $parameter = array('userId'=>0,'content'=>''))
+    {
+        if ($groupChat = GroupChat::find($id)) {
+            $messages = new Message;
+            $messages->user_id = $parameter['userId'];
+            $messages->content = $parameter['content'];
+            $messages->group_chat_id = $id;
+            $messages->save();
+            return Message::with('groupChat')->find($messages->id);
+        }
+        throw new Exception("group chat id does not exist", 400);
+        return (object)[];
+    } 
+
 } 

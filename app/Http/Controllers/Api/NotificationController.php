@@ -9,6 +9,7 @@ use App\Models\Likes;
 use App\Models\History;
 use App\Models\Pictures;
 use App\Models\User;
+use App\Models\GroupChat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -17,8 +18,11 @@ use Intervention\Image\Facades\Image;
 
 class NotificationController extends BaseController {
 
-    public function __construct(Request $request) {
+    protected $groupChat;
+
+    public function __construct(Request $request, GroupChat $groupChat) {
         parent::__construct($request);
+        $this->groupChat = $groupChat;
     }
 
     public function getNotify(Request $request)
@@ -29,19 +33,13 @@ class NotificationController extends BaseController {
         $validator = Validator::make($request->all(), $rules);
         if ( $validator->passes() ) {
 	        $user = $this->user;
-	            if( empty($user))
-	                return response()->json([
-	                        'status_code' => 401,
-	                        'messages'    => 'Unauthorized',
-	                        'data'        => array()
+            if( empty($user))
+                return response()->json([
+                        'status_code' => 401,
+                        'messages'    => 'Unauthorized',
+                        'data'        => array()
 	                        ],401);
-	        $data = array(['id'=>1, 
-		        	'user_id' => 2, 
-		        	'title' => 'Notifications 1', 
-		        	'descript' => 'abcdef', 
-		        	'is_read'=>0, 
-		        	'created_at'=> "2017-03-14 08:06:35",
-	        		'updated_at'=> "2017-03-14 08:06:35"]);
+	        $data = $this->groupChat->getListGroupByUserId($user->id);
 	        return $this->response([
 	                    'status_code' => 200,
 	                    'messages'    => 'request success',

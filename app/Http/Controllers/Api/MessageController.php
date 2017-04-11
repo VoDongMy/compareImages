@@ -10,6 +10,7 @@ use App\Models\History;
 use App\Models\Pictures;
 use App\Models\User;
 use App\Models\Message;
+use App\Models\GroupChat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -19,13 +20,15 @@ use Intervention\Image\Facades\Image;
 class MessageController extends BaseController {
 
     protected $message;
+    protected $groupChat;
 
-    public function __construct(Request $request, Message $message) {
+    public function __construct(Request $request, Message $message, GroupChat $groupChat) {
         parent::__construct($request);
         $this->message = $message;
+        $this->groupChat = $groupChat;
     }
 
-    public function getMessages(Request $request)
+    public function getListMessages(Request $request)
     {
         $rules = [
             // 'type'      => 'required|in:item'
@@ -39,13 +42,7 @@ class MessageController extends BaseController {
 	                        'messages'    => 'Unauthorized',
 	                        'data'        => array()
 	                        ],401);
-	        $data = array(['id'=>1, 
-		        	'user_id' => 2, 
-		        	'title' => 'Notifications 1', 
-		        	'descript' => 'abcdef', 
-		        	'is_read'=>0, 
-		        	'created_at'=> "2017-03-14 08:06:35",
-	        		'updated_at'=> "2017-03-14 08:06:35"]);
+	        $data = $this->groupChat->getListGroupByUserId($user->id);
 	        return $this->response([
 	                    'status_code' => 200,
 	                    'messages'    => 'request success',
@@ -66,6 +63,8 @@ class MessageController extends BaseController {
         ];
         $validator = Validator::make(array_merge($request->all(),['id' => $id]), $rules);
         if ( $validator->passes() ) {
+            $data = (object)[];
+            $messages = 'request success';
 	        $user = $this->user;
             if( empty($user))
                 return response()->json([
@@ -75,14 +74,14 @@ class MessageController extends BaseController {
                         ],401);
             $data = (object)[];
             try {
-                $this->message->sendMessageToUser($user->id, $parameter = ['toUserId' => $id, 'content' => $request->content]);
+                $data = $this->message->sendMessageToUser($user->id, $parameter = ['toUserId' => $id, 'content' => $request->content]);
             } catch (Exception $e) {
-                
+                $messages = $e->getMessage();
             }
 	        return $this->response([
 	                    'status_code' => 200,
-	                    'messages'    => 'request success',
-	                    'data'        => pushNotification($type, $parameter = ['udid'=>$request->udid]) ], 200);
+	                    'messages'    => $messages,
+	                    'data'        => $data], 200);
 	    }
 	    return $this->response([
                     'status_code' => 400,
