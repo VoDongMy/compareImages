@@ -20,13 +20,17 @@ use Intervention\Image\Facades\Image;
 
 class UserController extends BaseController
 {
-    public function __construct(Request $request) {
+    protected $user;
+
+    public function __construct(Request $request, User $user) {
       parent::__construct($request);
+      $this->user = $user;
     }
 
     public function postSignup(Request $request)
     {
         $rules = [
+            'facebook_id'         =>'required',
             'name'      => 'required',
             'gender'        => 'required|in:male,female',
             'curr_long'     =>'required',
@@ -38,11 +42,13 @@ class UserController extends BaseController
             $user = User::where('fb_id',$request->facebook_id)->first();
             if(empty($user)) {
                 $user =  new User();
+                $user->fb_id = $request->facebook_id;
+                $user->email =  $request->email;
                 $user->save();
             }
 
             // get new token
-            $token = $user->login($user->id, $parameter = array('udid'=>$request->udid, 'device_type'=>$request->device_type));
+            $token = $this->user->login($user->id, $parameter = array('udid'=>$request->udid, 'device_type'=>$request->device_type));
             if(empty($token))
             {
                 return $this->response([
@@ -63,7 +69,7 @@ class UserController extends BaseController
             $user->curr_lat = $request->has('curr_lat')? $request->curr_lat : '';
             $user->curr_long = $request->has('curr_long')? $request->curr_long : '';
             $user->location = $request->location? $request->location : 'N/A';
-
+            $user->save();
 
             return $this->response([
                     'status_code' => 200,

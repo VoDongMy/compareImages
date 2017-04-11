@@ -37,12 +37,12 @@ class User extends Model implements AuthenticatableContract,
      */
     //protected $hidden = ['password', 'remember_token'];
     public function login($userId = 0, $parameter = array('udid'=>'0', 'device_token'=>'0')) {
-        $token = '';
-        UserToken::where('user_id', '=', $userId)->delete();
+        $token = (object)[];
+        UserToken::where('user_id', $userId)->delete();
         $user = User::where('id',$userId)->where('status',1)->first();
         if ($user) {
             $token               = UserToken::getInstance();
-            $token->user_id      = $this->id;
+            $token->user_id      = $userId;
             $token->device_token = $parameter['udid'];
             $token->device_type = $parameter['device_type'];
             $token->save();
