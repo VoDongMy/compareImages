@@ -97,7 +97,7 @@ class ItemController extends BaseController{
             // 'item_id' => 'regex:/^[0-9]+$/',
             'quantity' => 'required|regex:/^[+-]?[0-9]+$/',
             'keyword' => '',
-            'cat_id' => 'regex:/^[0-9]+$/',
+            'category' => 'regex:/^([0-9]+,?)+$/',
             'order_by' => 'in:asc,desc',
         ];
         $validator = Validator::make($request->all(), $rules);
@@ -114,7 +114,7 @@ class ItemController extends BaseController{
             $direction = $request->has('quantity') && $request->quantity != 0? $request->quantity : 15;
             $orderBy = $request->has('order_by')? $request->order_by : 'asc';
             $page  = $request->has('page')?$request->page:1;
-            $items = Items::with('pictures','category','user')
+            $items = Items::with('pictures','category')
                     ->select(array('items.*'));
             if ($request->has('keyword')) 
                 $items = $items->where(function ($query) use ($request){
@@ -124,8 +124,17 @@ class ItemController extends BaseController{
                               ->orWhere('created_at', 'like', '%' . $request->keyword . '%');
                     });
 
-            if ($request->has('cat_id')) 
-                $items = $items->where('cat_id', $request->cat_id);
+            if ($request->has('category') ) {
+                $cat_id = explode(',', $request->category);
+                if (!in_array('0', $cat_id))
+                    $items = $items->whereIn('cat_id', $cat_id);
+            }
+
+            if ($request->has('min-price')) 
+                $items = $items->where('price','>=',$request->{'min-price'});
+
+            if ($request->has('max-price')) 
+                $items = $items->where('price','<=',$request->{'max-price'});
 
 
             if ($direction != 0) {
