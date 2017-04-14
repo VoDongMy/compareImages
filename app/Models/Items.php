@@ -36,6 +36,7 @@ class Items extends Model {
         // $longitudeFrom = $outputFrom->results[0]->geometry->location->lng;
         return '1,6 km';
     }
+    
     public function getDurationPostedAttribute() 
     {
         return  getDurationAgo( $this->created_at );

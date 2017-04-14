@@ -22,6 +22,6 @@ class Bids extends Model {
     }
 
     public function item() {
-        return $this->belongsTo('App\Items');
+        return $this->belongsTo('App\Models\Items');
     }
 } 

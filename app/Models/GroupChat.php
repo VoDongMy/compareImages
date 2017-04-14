@@ -5,11 +5,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class GroupChat extends Model {
+class GroupChat extends Model 
+{
 
     protected $table = 'group_chats';
 
-    protected $appends = ['message', 'object', 'listUsers'];
+    protected $appends = ['message', 'object', 'list_users'];
+
+    protected $fillable = ['id', 'object_id', 'object_type' ];
 
     public function user() {
         return $this->belongsTo('App\User');
@@ -22,15 +25,15 @@ class GroupChat extends Model {
 
     public function getListUsersAttribute() 
     {
+
         return User::select('id','name','profile_image','location')->whereHas('userGroupChats', function ( $query ) {
-                            // return $query->where('group_chat_id', $this->id );
-                            return 1;
+                            return $query->where('group_chat_id', $this->id );
                         })->get();
     }
 
     public function getListGroupByUserId($userId) 
     {
-        return GroupChat::select('id as group_chat_id', 'title', 'descript', 'created_at', 'updated_at')->where(function ($query) use ($userId) {
+        return GroupChat::select('id', 'title', 'descript', 'object_type', 'object_id', 'created_at', 'updated_at')->where(function ($query) use ($userId) {
                         $query->whereHas('userGroupChats', function ( $query ) use ($userId) {
                             return $query->where('user_id', $userId );
                         })->orWhere('user_id', $userId);
@@ -41,12 +44,11 @@ class GroupChat extends Model {
     {
     	switch ($this->object_type) {
     		case 0:
-    			$object = Items::select('id','title','price')->find(1);
-    			return empty($object)? (object)[] : $object;
+    			return (object)[];
     			break;
 
     		case 1:
-    			$object = Items::select('id','title','price')->find($this->object_id);
+    			$object = Bids::select('bids.id as bid_id','items.id','items.title','items.price')->join('items', 'items.id', '=', 'bids.item_id')->find($this->object_id);
     			return empty($object)? (object)[] : $object;
     			break;
     		

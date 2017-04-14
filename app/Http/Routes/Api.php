@@ -93,7 +93,9 @@ Route::group(['prefix' => 'api/'], function() {
             Route::put('/history/put-history/{type}', 'HistoryController@putHistories');
 
             //Bidding
-            Route::post('/item/bidding/{id}', 'ItemController@postBiddingItem');
+            Route::post('/item/bidding/{id}', 'BidController@postBiddingItem');
+            Route::put('/bidding/accept/{id}', 'BidController@putAcceptBiddingItem');
+            Route::put('/bidding/remove/{id}', 'BidController@putRemoveBiddingItem');
 
             //Notification
             Route::get('/notifications', 'NotificationController@getNotify');

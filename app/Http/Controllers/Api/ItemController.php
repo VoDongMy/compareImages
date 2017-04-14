@@ -624,45 +624,6 @@ class ItemController extends BaseController{
                     ], 400);
     }
 
-    public function postBiddingItem($id, Request $request)
-    {
-        $rules = [
-                'id'=>'required|regex:/^[0-9]+$/',
-                'price' => 'required|regex:/^[0-9]+$/',
-        ];
-        $validator = Validator::make(array_merge($request->all(),['id'=>$id]), $rules);
-        if ( $validator->passes() ) {
-            $user = $this->user;
-            $item = Items::find($id);
-            if( empty($item))
-                return $this->response([
-                        'status_code' => 400,
-                        'messages'    => 'Item not found.',
-                        'data'        => array()
-                        ],400); 
-            $bid = Bids::where('user_id',$user->id)->where('item_id',$id)->first();
-            if(empty($bid))
-                $bid = new Bids();
-            $bid->user_id = $user->id;
-            $bid->item_id = $id;
-            $bid->price_bidding = $request->price;
-            $bid->status = 0;
-            $bid->save();
-            return $this->response([
-                    'status_code' => 200,
-                    'messages'    => 'request success',
-                    'data'        => $item], 200);
-        }
-        return response()->json([
-            'status' => false,
-            'data'   => $validator->messages()->first()
-        ], 200);
-
-    }
-
-
-
-
 
     //
     public function show(Request $request)

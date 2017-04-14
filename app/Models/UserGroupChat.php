@@ -9,12 +9,12 @@ class UserGroupChat extends Model {
 
     protected $table = 'user_group_chats';
 
-    public function user() {
-        return $this->belongsTo('App\Models\User');
-    }
+    // public function user() {
+    //     return $this->belongsTo('App\Models\User');
+    // }
 
-    public function groupChat() {
-        return $this->belongsTo('App\Models\GroupChat');
-    }
+    // public function groupChat() {
+    //     return $this->belongsTo('App\Models\GroupChat');
+    // }
 
 } 
