@@ -65,4 +65,9 @@ class User extends Model implements AuthenticatableContract,
     {
         return $this->morphToMany('App\Models\Watch', 'watchable');
     }
+
+    public function userGroupChats()
+    {
+        return $this->hasMany('App\Models\UserGroupChat', 'user_id');
+    }
 }

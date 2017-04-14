@@ -22,7 +22,7 @@ class Items extends Model {
      */
     protected $fillable = ['name','price'];
 
-    protected $appends = ['duration_posted', 'distance'];
+    protected $appends = ['thumbnail_img', 'duration_posted', 'distance'];
 
     public function user() 
     {
@@ -44,6 +44,12 @@ class Items extends Model {
     public function category() 
     {
         return $this->belongsTo('App\Models\Category','cat_id');
+    }
+
+    public function getThumbnailImgAttribute()
+    {
+        $picture = $this->hasMany('App\Models\Pictures','item_id')->first();
+        return empty($picture)? '' : $picture->thumbnail;
     }
 
     public function pictures()

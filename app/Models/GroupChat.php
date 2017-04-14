@@ -9,7 +9,7 @@ class GroupChat extends Model {
 
     protected $table = 'group_chats';
 
-    protected $appends = ['message', 'object'];
+    protected $appends = ['message', 'object', 'listUsers'];
 
     public function user() {
         return $this->belongsTo('App\User');
@@ -20,9 +20,17 @@ class GroupChat extends Model {
         return $this->hasMany('App\Models\UserGroupChat', 'group_chat_id');
     }
 
+    public function getListUsersAttribute() 
+    {
+        return User::select('id','name','profile_image','location')->whereHas('userGroupChats', function ( $query ) {
+                            // return $query->where('group_chat_id', $this->id );
+                            return 1;
+                        })->get();
+    }
+
     public function getListGroupByUserId($userId) 
     {
-        return GroupChat::select('id', 'title', 'descript', 'created_at', 'updated_at')->where(function ($query) use ($userId) {
+        return GroupChat::select('id as group_chat_id', 'title', 'descript', 'created_at', 'updated_at')->where(function ($query) use ($userId) {
                         $query->whereHas('userGroupChats', function ( $query ) use ($userId) {
                             return $query->where('user_id', $userId );
                         })->orWhere('user_id', $userId);
