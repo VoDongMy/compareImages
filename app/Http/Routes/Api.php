@@ -64,6 +64,7 @@ Route::group(['prefix' => 'api/'], function() {
             Route::put('/user/update', 'UserController@putUpdate');
             Route::get('/user/sign-out', 'UserController@getSignout');
             Route::put('/user/setting', 'UserController@setting');
+            Route::get('/user/setting', 'UserController@getSetting');
             Route::delete('/user/delete/{id}', 'UserController@deleteAccount');
             Route::get('/user/my-bids', 'UserController@getMyBids');
 
@@ -79,10 +80,12 @@ Route::group(['prefix' => 'api/'], function() {
             Route::put('/item/update/{id}', 'ItemController@putUpdateItem');
             Route::delete('/item/delete/{id}', 'ItemController@deleteRemoveItem');
             Route::get('/item/lists', 'ItemController@getlistItem');
+
             //like/unlike
             Route::get('/item/like-lists', 'ItemController@getLikelistItems');
             Route::put('/item/like/{id}', 'ItemController@putLikeItem');
             Route::put('/item/unlike/{id}', 'ItemController@putUnLikeItem');
+            
             //watch/disWatch
             Route::get('/item/watch-lists', 'ItemController@getWatchlistItems');
             Route::put('/item/watch/{id}', 'ItemController@putWatchItem');

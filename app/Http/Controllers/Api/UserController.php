@@ -419,12 +419,11 @@ class UserController extends BaseController
     {
 
         $rules = [
-            'notify'      => 'required|in:0,1',
-            'distance'    => 'required',
-            'low_price'   => 'required',
-            'high_price'  => 'required'
+            // 'notify'      => 'required|in:0,1',
+            // 'distance'    => 'required',
+            // 'low_price'   => 'required',
+            // 'high_price'  => 'required'
         ];
-
         $validator = Validator::make($request->all(), $rules);
         if ( $validator->passes() ) {
             $user = $this->user;
@@ -434,16 +433,46 @@ class UserController extends BaseController
                     'messages'    => 'Unauthorized',
                     'data'        => array()
                     ],401);
-
+            $newSettings = $request->json()->all();
             $setting = Setting::where('user_id',$user->id)->first();
             if (empty($setting))
                 $setting = new Setting();
             $setting->user_id = $user->id;
-            $setting->notify = $request->notify;
-            $setting->distance = $request->distance;
-            $setting->low_price = $request->low_price;
-            $setting->high_price = $request->high_price;
+            $setting->settings = json_encode($newSettings);
             $setting->save();
+            
+            return $this->response([
+                    'status_code' => 200,
+                    'messages'    => 'request success',
+                    'data'        => $setting
+                    ], 200);
+        }
+        return $this->response([
+                'status_code' => 400,
+                'messages'    => $validator->messages()->first(),
+                'data'        => array()
+                ], 400);    
+    }
+
+    public function getSetting(Request $request)
+    {
+
+        $rules = [
+            // 'notify'      => 'required|in:0,1',
+            // 'distance'    => 'required',
+            // 'low_price'   => 'required',
+            // 'high_price'  => 'required'
+        ];
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->passes() ) {
+            $user = $this->user;
+            if (empty($user))
+                return response()->json([
+                    'status_code' => 401,
+                    'messages'    => 'Unauthorized',
+                    'data'        => array()
+                    ],401);
+            $setting = Setting::where('user_id',$user->id)->first();
             
             return $this->response([
                     'status_code' => 200,
