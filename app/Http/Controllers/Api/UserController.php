@@ -419,10 +419,12 @@ class UserController extends BaseController
     {
 
         $rules = [
-            // 'notify'      => 'required|in:0,1',
-            // 'distance'    => 'required',
-            // 'low_price'   => 'required',
-            // 'high_price'  => 'required'
+            'notify_new_exchange'      => 'required|in:0,1',
+            'notify_new_bids'      => 'required|in:0,1',
+            'notify_messages'      => 'required|in:0,1',
+            'distance'    => 'required',
+            'low_price'   => 'required',
+            'high_price'  => 'required'
         ];
         $validator = Validator::make($request->all(), $rules);
         if ( $validator->passes() ) {
@@ -433,7 +435,7 @@ class UserController extends BaseController
                     'messages'    => 'Unauthorized',
                     'data'        => array()
                     ],401);
-            $newSettings = $request->json()->all();
+            $newSettings = $request->all();
             $setting = Setting::where('user_id',$user->id)->first();
             if (empty($setting))
                 $setting = new Setting();
