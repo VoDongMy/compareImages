@@ -114,7 +114,7 @@ class ItemController extends BaseController{
             $direction = $request->has('quantity') && $request->quantity != 0? $request->quantity : 15;
             $orderBy = $request->has('order_by')? $request->order_by : 'asc';
             $page  = $request->has('page')?$request->page:1;
-            $items = Items::with('pictures','category')
+            $items = Items::with('pictures','category','user')
                     ->select(array('items.*'));
             if ($request->has('keyword')) 
                 $items = $items->where(function ($query) use ($request){
