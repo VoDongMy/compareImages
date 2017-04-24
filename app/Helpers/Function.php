@@ -164,5 +164,15 @@ function sendiOSNotification($deviceTokens, $messages = 'Notification', $extraDa
     return 'Message successfully delivered';
 }
 
+function getDistanceByLatLong($localtionA = ['lat'=>0,'long'=>0],$localtionB = ['lat'=>0,'long'=>0]) {
+  $RadiusOfTheEarth = 6371; // Radius of the earth in km
+  $diffLat = deg2rad($localtionB['lat']-$localtionA['lat']);  // deg2rad below
+  $diffLong = deg2rad($localtionB['long']-$localtionA['long']); 
+  $a =  sin($diffLat/2) * sin($diffLat/2) + cos(deg2rad($localtionA['lat'])) * cos(deg2rad($localtionB['lat'])) * sin($diffLong/2) * sin($diffLong/2) ; 
+  $c = 2 * atan2(sqrt($a), sqrt(1-$a)); 
+  $d = $RadiusOfTheEarth * $c; // Distance in km
+  return round($d, 2) . ' km';
+}
+
 
 ?>

@@ -31,10 +31,12 @@ class Items extends Model {
 
     public function getDistanceAttribute() 
     {
-        // $geoCodeUser = getGeoCode($this->user->location);
-        // $latitudeFrom = $outputFrom->results[0]->geometry->location->lat;
-        // $longitudeFrom = $outputFrom->results[0]->geometry->location->lng;
-        return '1,6 km';
+        $localtionA = User::find(1);
+        $localtionB = User::find($this->user_id);
+        if (empty($localtionA) || empty($localtionB) || empty($localtionA->curr_lat) || empty($localtionB->curr_lat) || empty($localtionA->curr_long) || empty($localtionB->curr_long)) {
+            return '0 km';
+        }
+        return getDistanceByLatLong($localtionA = ['lat'=>$localtionA->curr_lat,'long'=>$localtionA->curr_long],$localtionB = ['lat'=>$localtionB->curr_lat,'long'=>$localtionB->curr_long]);
     }
     
     public function getDurationPostedAttribute() 
