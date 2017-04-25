@@ -74,7 +74,9 @@ class MessageController extends BaseController {
                         ],401);
             $data = (object)[];
             try {
-                $data = $this->message->sendMessageToUser($user->id, $parameter = ['toUserId' => $id, 'content' => $request->content]);
+
+                $data = $this->message->pushMessageToGroup($id, $parameter = ['userId' => $user->id, 'content' => $request->content]);
+                // $data = $this->message->sendMessageToUser($user->id, $parameter = ['toUserId' => $id, 'content' => $request->content]);
             } catch (Exception $e) {
                 $messages = $e->getMessage();
             }
