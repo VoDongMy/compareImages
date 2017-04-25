@@ -35,6 +35,33 @@ class MessageController extends BaseController {
         ];
         $validator = Validator::make($request->all(), $rules);
         if ( $validator->passes() ) {
+            $user = $this->user;
+                if( empty($user))
+                    return response()->json([
+                            'status_code' => 401,
+                            'messages'    => 'Unauthorized',
+                            'data'        => array()
+                            ],401);
+            $data = $this->groupChat->getListGroupByUserId($user->id);
+            return $this->response([
+                        'status_code' => 200,
+                        'messages'    => 'request success',
+                        'data'        => empty($data)? (object)[] : $data], 200);
+        }
+        return $this->response([
+                    'status_code' => 400,
+                    'messages'    => $validator->messages()->first(),
+                    'data'        => array()
+                    ], 400);
+    }
+
+    public function getBoxMessages($id, Request $request)
+    {
+        $rules = [
+            // 'type'      => 'required|in:item'
+        ];
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->passes() ) {
 	        $user = $this->user;
 	            if( empty($user))
 	                return response()->json([
@@ -42,7 +69,10 @@ class MessageController extends BaseController {
 	                        'messages'    => 'Unauthorized',
 	                        'data'        => array()
 	                        ],401);
-	        $data = $this->groupChat->getListGroupByUserId($user->id);
+            $listMessages = $this->message->getMessageByBox($id);
+            $data['total'] = count($listMessages);
+            $data['limit'] = count($listMessages);
+	        $data['items'] = $listMessages;
 	        return $this->response([
 	                    'status_code' => 200,
 	                    'messages'    => 'request success',

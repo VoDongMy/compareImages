@@ -57,6 +57,15 @@ class Message extends Model {
         return (object)[];
     } 
 
+    public function getMessageByBox($id)
+    {
+        $groupChat = GroupChat::find($id);
+        if (!empty($groupChat)) {
+            return Message::where('group_chat_id',$id)->with('user')->get();
+        }
+        throw new Exception("item id does not exist", 400);
+        return (object)[];
+    }
 
     public function pushBidingMessageToUser($userId, $parameter = array('bidId'=>0,'content'=>''))
     {
