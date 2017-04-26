@@ -42,7 +42,8 @@ class GroupChat extends Model
                 $arrUserId = User::whereHas('userGroupChats', function ( $query ) use ($groupId) {
                             return $query->where('group_chat_id', $groupId);
                         })->lists('id')->toArray();
-                $data = UserToken::where('user_id',$arrUserId)->where('device_type',1)->lists('device_token')->toArray();
+
+                $data = UserToken::whereIn('user_id',array_merge($arrUserId,[GroupChat::find($groupId)->user_id]))->where('device_type',1)->lists('device_token')->toArray();
                 break;
             
             default:
