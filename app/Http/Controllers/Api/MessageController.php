@@ -163,7 +163,7 @@ class MessageController extends BaseController {
             try {
                 $data = $this->message->pushMessageToGroup($id, $parameter = ['userId' => $user->id, 'content' => $request->content]);
                 $deviceTokenUserInGroup = $this->groupChat->getDeviceToken($deviceType = 'ios', $id);
-                sendiOSNotification($deviceTokenUserInGroup, $messages = $parameter['content']);            
+                sendiOSNotification($deviceTokenUserInGroup, $messages = $parameter['content'], ['group_chat_id'=>$id, 'messages' => $parameter['content'], 'date_time'=>$data->created_at]);            
             } catch (Exception $e) {
                 $messages = $e->getMessage();
             }
