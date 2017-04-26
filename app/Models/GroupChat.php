@@ -35,6 +35,23 @@ class GroupChat extends Model
                         })->get();
     }
 
+    public function getDeviceToken($deviceType, $groupId) 
+    {
+        switch ($deviceType) {
+            case 'ios':
+                $arrUserId = User::whereHas('userGroupChats', function ( $query ) use ($groupId) {
+                            return $query->where('group_chat_id', $groupId);
+                        })->lists('id')->toArray();
+                $data = UserToken::where('user_id',$arrUserId)->where('device_type',1)->lists('device_token')->toArray();
+                break;
+            
+            default:
+                $data = [];
+                break;
+        }
+        return $data;
+    }
+
     public function getListGroupByUserId($userId) 
     {
         return GroupChat::select('id', 'title', 'descript', 'object_type', 'object_id', 'created_at', 'updated_at')->where(function ($query) use ($userId) {

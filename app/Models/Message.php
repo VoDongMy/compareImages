@@ -80,13 +80,11 @@ class Message extends Model {
                     }))->find($biding->item_id);
  
         if ($item) {
-            $myGroupChat = GroupChat::whereHas('userGroupChats', function ( $query ) use ($item) {
-                    return $query->where('user_id', $item->user_id );
-                })->where('user_id', $userId )->where('object_type',1)->first();
+            $myGroupChat = GroupChat::where('user_id', $userId )->where('object_type',1)->where('object_id',$biding->id)->first();
 
             $toGroupChat = GroupChat::whereHas('userGroupChats', function ( $query ) use ($userId) {
                     return $query->where('user_id', $userId );
-                })->where('user_id', $item->user_id )->where('object_type',1)->first();
+                })->where('object_id',$biding->id)->where('object_type',1)->first();
 
             $groupChat = empty($myGroupChat)? (empty($toGroupChat)? null : $toGroupChat) : $myGroupChat;
 
