@@ -97,7 +97,8 @@ class BidController extends BaseController{
     public function putAcceptBiddingItem($id, Request $request)
     {
         $rules = [
-                'id'=>'required|regex:/^[0-9]+$/'
+                'id'=>'required|regex:/^[0-9]+$/',
+                'status'=>'required|in:0,1,2,3'
         ];
         $validator = Validator::make(array_merge($request->all(),['id'=>$id]), $rules);
         if ( $validator->passes() ) {
@@ -118,15 +119,13 @@ class BidController extends BaseController{
 	        	$item = Items::with(array('user'=>function($query){
 	                        $query->leftJoin('user_tokens', 'users.id', '=', 'user_tokens.user_id')->select('users.id','user_tokens.device_token');
 	                    }))->find($biding->item->id);
-	        	// 1 accepts
-	            $biding->status = 1;
+	        	// 1:waiting accepts / 2:accepted / 3:unaccepts
+	            $biding->status = $request->status;
 	            if ($biding->save()) {
 	                //$notifySetting
-	                $messages = ' biding item ' . $biding->item->title . ' $' . $biding->price_bidding . ' is accept';
+	                $messages = ' biding item ' . $biding->item->title . ' $' . $biding->price_bidding . ' is accepted';
 
-	                $this->message->pushBidingMessageToUser($user->id, $parameter = ['bidId' => $biding->id, 'content' => $messages]);
-	                sendiOSNotification([$item->user->device_token], $messages);
-	            }
+	                $this->message->pushBidingMessageToUser($user->id, $parameter = ['bidId' => $biding->id, 'content' => $messages]);	            }
         	} catch (Exception $e) {
         		$messages = $e->getMessage();
         	}

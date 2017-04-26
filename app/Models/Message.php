@@ -102,6 +102,23 @@ class Message extends Model {
                 $userGroupChat->user_id = $item->user_id;
                 $userGroupChat->save();
             }
+
+            switch ($biding->status) {
+                case 3:
+                    Message::where('group_chat_id',$groupChat->id)->delete();
+                    UserGroupChat::where('group_chat_id',$groupChat->id)->delete();
+                    $groupChat->delete();
+                    break;
+                
+                default:
+                    # code...
+                    break;
+            }
+
+            // send notify
+            if ($biding->status == 2)
+                sendiOSNotification([$item->user->device_token], $messages = $parameter['content']);
+
             return $this->pushMessageToGroup($groupChat->id,['userId'=>$userId,'content'=>$parameter['content']]);
         }
         throw new Exception("item id does not exist", 400);

@@ -52,8 +52,8 @@ class GroupChat extends Model
     			break;
 
     		case 1:
-    			$object = Bids::select('bids.id as bid_id','items.id','items.title', 'bids.price_bidding as bidding_price', 'items.price as item_price', 'bids.status as status')->join('items', 'items.id', '=', 'bids.item_id')->find($this->object_id);
-    			return empty($object)? (object)[] : $object;
+    			$object = Bids::select('bids.id as bid_id','items.id','items.title','items.user_id as item_user_id', 'bids.price_bidding as bidding_price', 'items.price as item_price', 'bids.status as status')->join('items', 'items.id', '=', 'bids.item_id')->find($this->object_id);
+    			return empty($object)? (object)[] : array_merge($object->toArray(),['type' => 'biding']);
     			break;
     		
     		default:

@@ -43,6 +43,23 @@ class MessageController extends BaseController {
                             'data'        => array()
                             ],401);
             $data = $this->groupChat->getListGroupByUserId($user->id);
+            foreach ($data as $key => $groupChat) {
+                $object = $groupChat->object;
+                if (!empty($object)) {
+                    switch ($object['type']) 
+                    {
+                        case 'biding':
+                            if ($user->id != $object['item_user_id'] && $object['status'] != 2) {
+                                unset($data[$key]);
+                            }
+                            break;
+                        
+                        default:
+                            # code...
+                            break;
+                    }                
+                }
+            }
             return $this->response([
                         'status_code' => 200,
                         'messages'    => 'request success',
