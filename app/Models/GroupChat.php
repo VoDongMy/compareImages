@@ -48,7 +48,7 @@ class GroupChat extends Model
     {
     	switch ($this->object_type) {
     		case 0:
-    			return (object)[];
+    			return (object)['type' => ''];
     			break;
 
     		case 1:
@@ -57,7 +57,7 @@ class GroupChat extends Model
     			break;
     		
     		default:
-    			return (object)[];
+    			return (object)['type' => ''];
     			break;
     	}
         return (object)[];
