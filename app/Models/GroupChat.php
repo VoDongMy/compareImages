@@ -15,7 +15,11 @@ class GroupChat extends Model
     protected $fillable = ['id', 'object_id', 'object_type' ];
 
     public function user() {
-        return $this->belongsTo('App\User');
+        return $this->belongsTo('App\Models\User');
+    }
+
+    public function messages() {
+        return $this->hasMany('App\Models\Message', 'group_chat_id');
     }
 
 	public function userGroupChats()
@@ -48,7 +52,7 @@ class GroupChat extends Model
     			break;
 
     		case 1:
-    			$object = Bids::select('bids.id as bid_id','items.id','items.title','items.price')->join('items', 'items.id', '=', 'bids.item_id')->find($this->object_id);
+    			$object = Bids::select('bids.id as bid_id','items.id','items.title', 'bids.price_bidding as bidding_price', 'items.price as item_price')->join('items', 'items.id', '=', 'bids.item_id')->find($this->object_id);
     			return empty($object)? (object)[] : $object;
     			break;
     		

@@ -62,21 +62,61 @@ class MessageController extends BaseController {
         ];
         $validator = Validator::make($request->all(), $rules);
         if ( $validator->passes() ) {
-	        $user = $this->user;
-	            if( empty($user))
-	                return response()->json([
-	                        'status_code' => 401,
-	                        'messages'    => 'Unauthorized',
-	                        'data'        => array()
-	                        ],401);
+            $user = $this->user;
+                if( empty($user))
+                    return response()->json([
+                            'status_code' => 401,
+                            'messages'    => 'Unauthorized',
+                            'data'        => array()
+                            ],401);
             $listMessages = $this->message->getMessageByBox($id);
             $data['total'] = count($listMessages);
             $data['limit'] = count($listMessages);
-	        $data['items'] = $listMessages;
-	        return $this->response([
-	                    'status_code' => 200,
-	                    'messages'    => 'request success',
-	                    'data'        => empty($data)? (object)[] : $data], 200);
+            $data['items'] = $listMessages;
+            return $this->response([
+                        'status_code' => 200,
+                        'messages'    => 'request success',
+                        'data'        => empty($data)? (object)[] : $data], 200);
+        }
+        return $this->response([
+                    'status_code' => 400,
+                    'messages'    => $validator->messages()->first(),
+                    'data'        => array()
+                    ], 400);
+    }
+
+    public function deleteBoxMessages($id, Request $request)
+    {
+        $rules = [
+            'id'      => 'required'
+        ];
+        $validator = Validator::make(array_merge($request->all(),['id'=>$id]), $rules);
+        if ( $validator->passes() ) {
+            try {
+                $user = $this->user;
+                if( empty($user))
+                    throw new Exception("Unauthorized", 401);
+                    
+                $groupChat = GroupChat::with('messages')->find($id);
+                if (empty($groupChat)) 
+                    throw new \Exception("box chat id does not exist", 400);
+                else {
+                    Message::where('group_chat_id',$groupChat->id)->delete();
+                    $groupChat->delete();
+                }
+            } catch (\Exception $e) {
+                return response()->json([
+                            'status_code' => $e->getCode(),
+                            'messages'    => $e->getMessage(),
+                            'data'        => (object)['delete' => false]
+                            ],$e->getCode());
+            }
+
+            return $this->response([
+                        'status_code' => 200,
+                        'messages'    => 'request success',
+                        'data'        => (object)['delete' => true]], 200);
+	        
 	    }
 	    return $this->response([
                     'status_code' => 400,

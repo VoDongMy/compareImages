@@ -98,7 +98,6 @@ Route::group(['prefix' => 'api/'], function() {
             //Bidding
             Route::post('/item/bidding/{id}', 'BidController@postBiddingItem');
             Route::put('/bidding/accept/{id}', 'BidController@putAcceptBiddingItem');
-            Route::put('/bidding/remove/{id}', 'BidController@putRemoveBiddingItem');
 
             //Notification
             Route::get('/notifications', 'NotificationController@getNotify');
@@ -107,6 +106,7 @@ Route::group(['prefix' => 'api/'], function() {
             //Messages
             Route::get('/messages/lists', 'MessageController@getListMessages');
             Route::get('/messages/{id}', 'MessageController@getBoxMessages');
+            Route::delete('/messages/remove/{id}', 'MessageController@deleteBoxMessages');
             Route::post('/messages/send/{id}', 'MessageController@postSendMessage');
 
         });

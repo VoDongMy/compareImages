@@ -61,7 +61,9 @@ class Message extends Model {
     {
         $groupChat = GroupChat::find($id);
         if (!empty($groupChat)) {
-            return Message::where('group_chat_id',$id)->with('user')->get();
+            return Message::where('group_chat_id',$id)->with(['user'=>function($query){
+                        return $query->select('users.id', 'users.name','users.profile_image','users.location'); 
+                    }])->get();
         }
         throw new Exception("item id does not exist", 400);
         return (object)[];
