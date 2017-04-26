@@ -70,7 +70,7 @@ class BidController extends BaseController{
 	            $bid->user_id = $user->id;
 	            $bid->item_id = $id;
 	            $bid->price_bidding = $request->price;
-	            $bid->status = 0;
+	            $bid->status = 1;
 	            if ($bid->save()) {
 	                //$notifySetting
 	            	$messages = 'New biding item ' . $item->title . ' $' . $request->price;
