@@ -46,10 +46,10 @@ class MessageController extends BaseController {
             foreach ($data as $key => $groupChat) {
                 $object = $groupChat->object;
                 if (!empty($object)) {
-                    switch ($object['type']) 
+                    switch ($object->type) 
                     {
                         case 'biding':
-                            if ($user->id != $object['item_user_id'] && $object['status'] != 2) {
+                            if ($user->id != $object->item_user_id && $object->status != 2) {
                                 unset($data[$key]);
                             }
                             break;
