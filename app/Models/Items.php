@@ -31,7 +31,7 @@ class Items extends Model {
 
     public function getDistanceAttribute() 
     {
-        $localtionA = User::find(1);
+        $localtionA = User::find(6);
         $localtionB = User::find($this->user_id);
         if (empty($localtionA) || empty($localtionB) || empty($localtionA->curr_lat) || empty($localtionB->curr_lat) || empty($localtionA->curr_long) || empty($localtionB->curr_long)) {
             return '0 km';

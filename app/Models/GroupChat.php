@@ -43,7 +43,7 @@ class GroupChat extends Model
                             return $query->where('group_chat_id', $groupId);
                         })->lists('id')->toArray();
 
-                $data = UserToken::whereIn('user_id',array_merge($arrUserId,[GroupChat::find($groupId)->user_id]))->where('device_type',1)->lists('device_token')->toArray();
+                $data = UserToken::whereIn('user_id',array_merge($arrUserId,[GroupChat::find($groupId)->user_id]))->lists('device_token')->toArray();
                 break;
             
             default:

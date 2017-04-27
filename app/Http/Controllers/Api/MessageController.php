@@ -43,6 +43,7 @@ class MessageController extends BaseController {
                             'data'        => array()
                             ],401);
             $data = $this->groupChat->getListGroupByUserId($user->id);
+            $response = array();
             foreach ($data as $key => $groupChat) {
                 $object = $groupChat->object;
                 if (!empty($object)) {
@@ -51,11 +52,13 @@ class MessageController extends BaseController {
                         case 'biding':
                             if ($user->id != $object->item_user_id && $object->status != 2) {
                                 unset($data[$key]);
+                            } else {
+                                array_push($response, $groupChat);
                             }
                             break;
                         
                         default:
-                            # code...
+                            array_push($response, $groupChat);
                             break;
                     }                
                 }
@@ -63,7 +66,7 @@ class MessageController extends BaseController {
             return $this->response([
                         'status_code' => 200,
                         'messages'    => 'request success',
-                        'data'        => empty($data)? (object)[] : $data], 200);
+                        'data'        => empty($response)? [] : $response], 200);
         }
         return $this->response([
                     'status_code' => 400,
@@ -163,7 +166,7 @@ class MessageController extends BaseController {
             try {
                 $data = $this->message->pushMessageToGroup($id, $parameter = ['userId' => $user->id, 'content' => $request->content]);
                 $deviceTokenUserInGroup = $this->groupChat->getDeviceToken($deviceType = 'ios', $id);
-                sendiOSNotification($deviceTokenUserInGroup, $messages = $parameter['content'], ['group_chat_id'=>$id, 'messages' => $parameter['content'], 'date_time'=>$data->created_at]);            
+                sendiOSNotification($deviceTokenUserInGroup, $messages = $parameter['content'], ['type'=>1,'group_chat_id'=>$id, 'messages' => $parameter['content'], 'date_time'=>$data->created_at]);            
             } catch (Exception $e) {
                 $messages = $e->getMessage();
             }
