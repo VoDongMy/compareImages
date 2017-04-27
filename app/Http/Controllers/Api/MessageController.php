@@ -78,9 +78,11 @@ class MessageController extends BaseController {
     public function getBoxMessages($id, Request $request)
     {
         $rules = [
-            // 'type'      => 'required|in:item'
+            'id'      => 'required|numeric',
+            'start_date_time'      => 'date_format:"Y-m-d H:i:s"',
+            'quantity'      => 'numeric'
         ];
-        $validator = Validator::make($request->all(), $rules);
+        $validator = Validator::make(array_merge($request->all(),['id'=>$id]), $rules);
         if ( $validator->passes() ) {
             $user = $this->user;
                 if( empty($user))
@@ -89,10 +91,15 @@ class MessageController extends BaseController {
                             'messages'    => 'Unauthorized',
                             'data'        => array()
                             ],401);
-            $listMessages = $this->message->getMessageByBox($id);
-            $data['total'] = count($listMessages);
-            $data['limit'] = count($listMessages);
-            $data['items'] = $listMessages;
+            $listMessages = $this->message->getSelectMessageByBox($id);
+            $data['total'] = $listMessages->count();
+            $data['limit'] = empty($request->quantity)? 0 : $request->quantity;
+
+            $listMessages = empty($request->start_date_time)? $listMessages : $listMessages->where('messages.created_at','<',$request->start_date_time);
+
+            $listMessages = empty($request->quantity)? $listMessages : $listMessages->take($request->quantity);
+            
+            $data['items'] = $listMessages->orderBy('created_at', 'DESC')->get();
             return $this->response([
                         'status_code' => 200,
                         'messages'    => 'request success',
