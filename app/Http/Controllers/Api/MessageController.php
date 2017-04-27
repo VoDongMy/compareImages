@@ -43,6 +43,7 @@ class MessageController extends BaseController {
                             'data'        => array()
                             ],401);
             $data = $this->groupChat->getListGroupByUserId($user->id);
+            $response = array();
             foreach ($data as $key => $groupChat) {
                 $object = $groupChat->object;
                 if (!empty($object)) {
@@ -51,11 +52,13 @@ class MessageController extends BaseController {
                         case 'biding':
                             if ($user->id != $object->item_user_id && $object->status != 2) {
                                 unset($data[$key]);
+                            } else {
+                                array_push($response, $groupChat);
                             }
                             break;
                         
                         default:
-                            # code...
+                            array_push($response, $groupChat);
                             break;
                     }                
                 }
@@ -63,7 +66,7 @@ class MessageController extends BaseController {
             return $this->response([
                         'status_code' => 200,
                         'messages'    => 'request success',
-                        'data'        => empty($data)? (object)[] : $data], 200);
+                        'data'        => empty($response)? [] : $response], 200);
         }
         return $this->response([
                     'status_code' => 400,
@@ -75,9 +78,11 @@ class MessageController extends BaseController {
     public function getBoxMessages($id, Request $request)
     {
         $rules = [
-            // 'type'      => 'required|in:item'
+            'id'      => 'required|numeric',
+            'start_date_time'      => 'date_format:"Y-m-d H:i:s"',
+            'quantity'      => 'numeric'
         ];
-        $validator = Validator::make($request->all(), $rules);
+        $validator = Validator::make(array_merge($request->all(),['id'=>$id]), $rules);
         if ( $validator->passes() ) {
             $user = $this->user;
                 if( empty($user))
@@ -86,10 +91,15 @@ class MessageController extends BaseController {
                             'messages'    => 'Unauthorized',
                             'data'        => array()
                             ],401);
-            $listMessages = $this->message->getMessageByBox($id);
-            $data['total'] = count($listMessages);
-            $data['limit'] = count($listMessages);
-            $data['items'] = $listMessages;
+            $listMessages = $this->message->getSelectMessageByBox($id);
+            $data['total'] = $listMessages->count();
+            $data['limit'] = empty($request->quantity)? 0 : $request->quantity;
+
+            $listMessages = empty($request->start_date_time)? $listMessages : $listMessages->where('messages.created_at','<',$request->start_date_time);
+
+            $listMessages = empty($request->quantity)? $listMessages : $listMessages->take($request->quantity);
+            
+            $data['items'] = $listMessages->orderBy('created_at', 'DESC')->get();
             return $this->response([
                         'status_code' => 200,
                         'messages'    => 'request success',
@@ -163,7 +173,7 @@ class MessageController extends BaseController {
             try {
                 $data = $this->message->pushMessageToGroup($id, $parameter = ['userId' => $user->id, 'content' => $request->content]);
                 $deviceTokenUserInGroup = $this->groupChat->getDeviceToken($deviceType = 'ios', $id);
-                sendiOSNotification($deviceTokenUserInGroup, $messages = $parameter['content'], ['group_chat_id'=>$id, 'messages' => $parameter['content'], 'date_time'=>$data->created_at]);            
+                sendiOSNotification($deviceTokenUserInGroup, $messages = $parameter['content'], ['type'=>1,'group_chat_id'=>$id, 'messages' => $parameter['content'], 'date_time'=>$data->created_at]);            
             } catch (Exception $e) {
                 $messages = $e->getMessage();
             }
