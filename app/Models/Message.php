@@ -129,6 +129,7 @@ class Message extends Model {
             $messages = new Message;
             $messages->user_id = $parameter['userId'];
             $messages->content = $parameter['content'];
+            $messages->type = $parameter['type'];
             $messages->group_chat_id = $id;
             $messages->save();
             return Message::with('groupChat')->find($messages->id);

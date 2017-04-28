@@ -156,6 +156,7 @@ class MessageController extends BaseController {
     {
         $rules = [
             'id'      => 'required|regex:/^([0-9]+,?)+$/',
+            'type'    => 'required|in:0,1,2,3',
             'content'      => 'required'
         ];
         $validator = Validator::make(array_merge($request->all(),['id' => $id]), $rules);
@@ -171,7 +172,7 @@ class MessageController extends BaseController {
                         ],401);
             $data = (object)[];
             try {
-                $data = $this->message->pushMessageToGroup($id, $parameter = ['userId' => $user->id, 'content' => $request->content]);
+                $data = $this->message->pushMessageToGroup($id, $parameter = ['userId' => $user->id,'type' => $request->type, 'content' => $request->content]);
                 $deviceTokenUserInGroup = $this->groupChat->getDeviceToken($deviceType = 'ios', $id);
                 sendiOSNotification($deviceTokenUserInGroup, $messages = $parameter['content'], ['type'=>1,'group_chat_id'=>$id, 'messages' => $parameter['content'], 'date_time'=>$data->created_at]);            
             } catch (Exception $e) {
