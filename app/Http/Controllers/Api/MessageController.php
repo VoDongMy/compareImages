@@ -99,7 +99,7 @@ class MessageController extends BaseController {
 
             $listMessages = empty($request->quantity)? $listMessages : $listMessages->take($request->quantity);
             
-            $data['items'] = $listMessages->orderBy('created_at', 'DESC')->get();
+            $data['items'] = $listMessages->orderBy('created_at', 'ASC')->get();
             return $this->response([
                         'status_code' => 200,
                         'messages'    => 'request success',
