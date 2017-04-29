@@ -73,6 +73,7 @@ class ItemController extends BaseController{
                 $skip = $limit*((int)$page-1);
                 $response = $items->take((int)$limit)->skip($skip)->orderBy('items.created_at', $orderBy)->get();
             }
+            
             return $this->response([
                     'status_code' => 200,
                     'messages'    => 'request success',
@@ -94,10 +95,11 @@ class ItemController extends BaseController{
     public function getlistItem(Request $request)
     {   
         $rules = [
-            // 'item_id' => 'regex:/^[0-9]+$/',
+            'maximun-distance' => 'regex:/^[0-9]+$/',
             'quantity' => 'required|regex:/^[+-]?[0-9]+$/',
             'keyword' => '',
             'category' => 'regex:/^([0-9]+,?)+$/',
+            'condition' => 'in:0,1',
             'order_by' => 'in:asc,desc',
         ];
         $validator = Validator::make($request->all(), $rules);
@@ -110,12 +112,13 @@ class ItemController extends BaseController{
                     'data'        => array()
                     ],401);            
             $historyItem = History::where('user_id',$user->id)->where('history_type','item')->first();
-            $item_id = empty($historyItem->history->reading_item_id)? 0 : $historyItem->history->reading_item_id;
+            $arrIsReadItemId = empty($historyItem->history->reading_item_id)? 0 : $historyItem->history->reading_item_id;
             $direction = $request->has('quantity') && $request->quantity != 0? $request->quantity : 15;
             $orderBy = $request->has('order_by')? $request->order_by : 'asc';
             $page  = $request->has('page')?$request->page:1;
             $items = Items::with('pictures','category','user')->where('user_id','!=',$user->id)
                     ->select(array('items.*'));
+       
             if ($request->has('keyword')) 
                 $items = $items->where(function ($query) use ($request){
                         $query->where('title', 'like', '%' . $request->keyword . '%')
@@ -129,46 +132,53 @@ class ItemController extends BaseController{
                 if (!in_array('0', $cat_id))
                     $items = $items->whereIn('cat_id', $cat_id);
             }
-
-            if ($request->has('min-price')) 
+            if ($request->has('min-price') && (int)$request->{'min-price'} > 0) 
                 $items = $items->where('price','>=',$request->{'min-price'});
 
-            if ($request->has('max-price')) 
+            if ($request->has('max-price') && (int)$request->{'max-price'} > 0) 
                 $items = $items->where('price','<=',$request->{'max-price'});
-
-
+            // echo json_encode($items->get());die;
+            if (!empty($arrIsReadItemId) && is_array($arrIsReadItemId))
+                $items = $items->whereNotIn('id',$arrIsReadItemId);
+            $total = $items->count();
             if ($direction != 0) {
-                if ($direction > 0) {
-                    $items = $items->where('id','>',$item_id);
-                }
-                else {
-                    $items = $items->where('id','<',$item_id);
-                }
                 $limit = abs($direction);
             } else {
-                $limit = 0;
+                $limit = $total;
             }
-
-            $total = $items->count();
-
-            if ($limit <= 0) {
-                $limit = 0;
-                $maxPage = $page = 1;
-                $response = $items->orderBy('items.created_at', $orderBy)->get();
-            } else {
-                // paging data
-                $maxPage = ceil($total / $limit);
+            $maxPage = ceil($total / $limit);
+            $tmpPage = 0;
+            $responseData = array();
+            if ($request->has('maximun-distance') && (int)$request->{'maximun-distance'} > 0) 
+                while(count($responseData) <= $limit && $tmpPage <= $maxPage) {
+                    $tmpPage += 1;
+                    $skip = $limit*((int)$tmpPage-1);
+                    $response = $items->take($limit)->skip($skip)->orderBy('items.created_at', $orderBy)->get();
+                    foreach ($response as $key => $item) {
+                        $localtionA = $user;
+                        $localtionB = User::find($item->user_id);
+                        if (empty($localtionA) || empty($localtionB) || empty($localtionA->curr_lat) || empty($localtionB->curr_lat) || empty($localtionA->curr_long) || empty($localtionB->curr_long)) {
+                            return '0 km';
+                        }
+                        $distance =  getDistanceByLatLong($localtionA = ['lat'=>$localtionA->curr_lat,'long'=>$localtionA->curr_long],$localtionB = ['lat'=>$localtionB->curr_lat,'long'=>$localtionB->curr_long]);
+                        $item->distance = $distance . ' km';
+                        if ($distance <= (int)$request->{'maximun-distance'})
+                            array_push($responseData, $item); 
+                    }
+                } 
+            else {
                 $skip = $limit*((int)$page-1);
-                $response = $items->take((int)$limit)->skip($skip)->orderBy('items.created_at', $orderBy)->get();
+                $responseData = $items->take((int)$limit)->skip($skip)->orderBy('items.created_at', $orderBy)->get();
             }
+
             return $this->response([
                     'status_code' => 200,
                     'messages'    => 'request success',
                     'data'        => (object)['total' => $total,
                                             'limit' => $limit,
                                             'page' => $page,
-                                            'max_page' => $maxPage,
-                                            'items' => $response]
+                                            // 'max_page' => $maxPage,
+                                            'items' => $responseData]
                                             ], 200); 
         }
         return $this->response([
@@ -352,7 +362,12 @@ class ItemController extends BaseController{
             { 
                 $watch->delete();
             } else {
-                $this->history->putHistories($user->id,["reading_item_id" => $item->id], $historyType = 'item');
+                $historyItem = History::where('user_id',$user->id)->where('history_type','item')->first();
+                $readingItemId = isset($historyItem->history->reading_item_id)? 
+                                (is_array($historyItem->history->reading_item_id)? 
+                                    (in_array($item->id, $historyItem->history->reading_item_id)? $historyItem->history->reading_item_id : array_merge($historyItem->history->reading_item_id, [$item->id])) : [$item->id]) 
+                                : [$item->id];
+                $this->history->putHistories($user->id,["reading_item_id" => $readingItemId], $historyType = 'item');
             }
             return $this->response([
                     'status_code' => 200,
@@ -393,7 +408,12 @@ class ItemController extends BaseController{
             {
                 $like->delete();    
             } else {
-                $this->history->putHistories($user->id,["reading_item_id" => $item->id], $historyType = 'item');
+                $historyItem = History::where('user_id',$user->id)->where('history_type','item')->first();
+                $readingItemId = isset($historyItem->history->reading_item_id)? 
+                                (is_array($historyItem->history->reading_item_id)? 
+                                    (in_array($item->id, $historyItem->history->reading_item_id)? $historyItem->history->reading_item_id : array_merge($historyItem->history->reading_item_id, [$item->id])) : [$item->id]) 
+                                : [$item->id];
+                $this->history->putHistories($user->id,["reading_item_id" => $readingItemId], $historyType = 'item');
             }
             $item->dislike_count = (int)$item->dislike_count + 1;
             $item->save();
@@ -430,7 +450,12 @@ class ItemController extends BaseController{
                         'messages'    => 'Item not found.',
                         'data'        => array()
                         ],400); 
-            $this->history->putHistories($user->id,["reading_item_id" => $item->id], $historyType = 'item');
+            $historyItem = History::where('user_id',$user->id)->where('history_type','item')->first();
+            $readingItemId = isset($historyItem->history->reading_item_id)? 
+                                (is_array($historyItem->history->reading_item_id)? 
+                                    (in_array($item->id, $historyItem->history->reading_item_id)? $historyItem->history->reading_item_id : array_merge($historyItem->history->reading_item_id, [$item->id])) : [$item->id]) 
+                                : [$item->id];
+            $this->history->putHistories($user->id,["reading_item_id" => $readingItemId], $historyType = 'item');
             $like = Likes::where('like_id',$id)->where('like_type','item');
             if(empty($like->where('user_id',$user->id)->first()))
             {
@@ -475,7 +500,12 @@ class ItemController extends BaseController{
                         'messages'    => 'Item not found.',
                         'data'        => array()
                         ],400); 
-            $this->history->putHistories($user->id,["reading_item_id" => $item->id], $historyType = 'item');
+            $historyItem = History::where('user_id',$user->id)->where('history_type','item')->first();
+            $readingItemId = isset($historyItem->history->reading_item_id)? 
+                                (is_array($historyItem->history->reading_item_id)? 
+                                    (in_array($item->id, $historyItem->history->reading_item_id)? $historyItem->history->reading_item_id : array_merge($historyItem->history->reading_item_id, [$item->id])) : [$item->id]) 
+                                : [$item->id];
+            $this->history->putHistories($user->id,["reading_item_id" => $readingItemId], $historyType = 'item');
             $watch = Watch::where('watch_id',$id)->where('watch_type','item');
             if(empty($watch->where('user_id',$user->id)->first()))
             {
@@ -611,7 +641,12 @@ class ItemController extends BaseController{
                         'messages'    => 'Item not found.',
                         'data'        => array()
                         ],400); 
-            $this->history->putHistories($user->id,["reading_item_id" => $item->id], $historyType = 'item');
+            $historyItem = History::where('user_id',$user->id)->where('history_type','item')->first();
+            $readingItemId = isset($historyItem->history->reading_item_id)? 
+                                (is_array($historyItem->history->reading_item_id)? 
+                                    (in_array($item->id, $historyItem->history->reading_item_id)? $historyItem->history->reading_item_id : array_merge($historyItem->history->reading_item_id, [$item->id])) : [$item->id]) 
+                                : [$item->id];
+            $this->history->putHistories($user->id,["reading_item_id" => $readingItemId], $historyType = 'item');
             return $this->response([
                     'status_code' => 200,
                     'messages'    => 'request success',

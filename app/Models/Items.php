@@ -31,12 +31,12 @@ class Items extends Model {
 
     public function getDistanceAttribute() 
     {
-        $localtionA = User::find(6);
+        $localtionA = User::first();
         $localtionB = User::find($this->user_id);
         if (empty($localtionA) || empty($localtionB) || empty($localtionA->curr_lat) || empty($localtionB->curr_lat) || empty($localtionA->curr_long) || empty($localtionB->curr_long)) {
             return '0 km';
         }
-        return getDistanceByLatLong($localtionA = ['lat'=>$localtionA->curr_lat,'long'=>$localtionA->curr_long],$localtionB = ['lat'=>$localtionB->curr_lat,'long'=>$localtionB->curr_long]);
+        return getDistanceByLatLong($localtionA = ['lat'=>$localtionA->curr_lat,'long'=>$localtionA->curr_long],$localtionB = ['lat'=>$localtionB->curr_lat,'long'=>$localtionB->curr_long]) . ' km';
     }
     
     public function getDurationPostedAttribute() 
@@ -69,4 +69,5 @@ class Items extends Model {
     {
         return $this->morphToMany('App\Models\Watchs', 'watchable');
     }
+
 } 
