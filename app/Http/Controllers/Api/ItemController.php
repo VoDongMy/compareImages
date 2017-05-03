@@ -541,7 +541,7 @@ class ItemController extends BaseController{
                         'messages'    => 'Unauthorized',
                         'data'        => array()
                         ],401); 
-            $items = Items::select('items.*')->join('likeable', function ($join) use ($user) {
+            $items = Items::select('items.*')->with('pictures','category','user')->join('likeable', function ($join) use ($user) {
                         $join->on('likeable.like_id', '=', 'items.id')
                              ->where('likeable.user_id', '=', $user->id)
                              ->where('likeable.like_type', '=', 'item');
@@ -584,7 +584,7 @@ class ItemController extends BaseController{
                     'data'        => array()
                     ],401);            
             $page  = $request->has('page')?$request->page:1;
-            $items = Items::select('items.*')->join('watchable', function ($join) use ($user) {
+            $items = Items::select('items.*')->with('pictures','category','user')->join('watchable', function ($join) use ($user) {
                         $join->on('watchable.watch_id', '=', 'items.id')
                              ->where('watchable.user_id', '=', $user->id)
                              ->where('watchable.watch_type', '=', 'item');
@@ -609,7 +609,6 @@ class ItemController extends BaseController{
                                             'limit' => $limit,
                                             'page' => $page,
                                             'max_page' => $maxPage,
-                                            'user' => $user,
                                             'items' => $response]
                                             ], 200); 
         }

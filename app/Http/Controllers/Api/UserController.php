@@ -31,7 +31,6 @@ class UserController extends BaseController
 
     public function postSignup(Request $request)
     {
-	DataLog::logPublic('login.log', $request->all());
         $rules = [
             'facebook_id'         =>'required',
             'name'      => 'required',
@@ -40,7 +39,7 @@ class UserController extends BaseController
             'curr_lat'      =>'',
             'location'         =>''
         ];
-        $validator = Validator::make($request->all(), $rules);
+    $validator = Validator::make($request->all(), $rules);
 	if ( $validator->passes() ) {
             $user = User::where('fb_id',$request->facebook_id)->first();
             if(empty($user)) {
