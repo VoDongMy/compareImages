@@ -13,10 +13,12 @@ use App\Models\Bids;
 use App\Models\Items;
 use App\Models\Setting;
 use App\Models\User;
+use App\Models\UserToken;
 use App\Models\Wishlists;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Facades\Image;
+use App\Helpers\DataLog;
 
 class UserController extends BaseController
 {
@@ -29,16 +31,17 @@ class UserController extends BaseController
 
     public function postSignup(Request $request)
     {
+	DataLog::logPublic('login.log', $request->all());
         $rules = [
             'facebook_id'         =>'required',
             'name'      => 'required',
-            'gender'        => 'required|in:male,female',
-            'curr_long'     =>'required',
-            'curr_lat'      =>'required',
-            'location'         =>'required'
+            'gender'        => 'in:male,female',
+            'curr_long'     =>'',
+            'curr_lat'      =>'',
+            'location'         =>''
         ];
         $validator = Validator::make($request->all(), $rules);
-        if ( $validator->passes() ) {
+	if ( $validator->passes() ) {
             $user = User::where('fb_id',$request->facebook_id)->first();
             if(empty($user)) {
                 $user =  new User();
@@ -70,7 +73,7 @@ class UserController extends BaseController
             $user->curr_long = $request->has('curr_long')? $request->curr_long : '';
             $user->location = $request->location? $request->location : 'N/A';
             $user->save();
-
+	    $token = UserToken::with('user')->find($token->id);
             return $this->response([
                     'status_code' => 200,
                     'messages'    => 'request success',
