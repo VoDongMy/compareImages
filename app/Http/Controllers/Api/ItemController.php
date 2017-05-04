@@ -37,7 +37,7 @@ class ItemController extends BaseController{
     }
 
     public function getlistMyItem(Request $request)
-    {   
+    {
         $rules = [
             'limit' => 'regex:/^[0-9]+$/',
             'page' => 'regex:/^[0-9]+$/',
@@ -93,7 +93,7 @@ class ItemController extends BaseController{
     }
 
     public function getlistItem(Request $request)
-    {   
+    {
         $rules = [
             'maximun-distance' => 'regex:/^[0-9]+$/',
             'quantity' => 'required|regex:/^[+-]?[0-9]+$/',
@@ -337,7 +337,7 @@ class ItemController extends BaseController{
     }
 
     public function putUnWatchItem($id, Request $request)
-    { 
+    {
         $rules = [
                 'id'     =>'regex:/^[0-9]+$/'
             ];
@@ -361,14 +361,9 @@ class ItemController extends BaseController{
             if(!empty($watch))
             { 
                 $watch->delete();
-            } else {
-                $historyItem = History::where('user_id',$user->id)->where('history_type','item')->first();
-                $readingItemId = isset($historyItem->history->reading_item_id)? 
-                                (is_array($historyItem->history->reading_item_id)? 
-                                    (in_array($item->id, $historyItem->history->reading_item_id)? $historyItem->history->reading_item_id : array_merge($historyItem->history->reading_item_id, [$item->id])) : [$item->id]) 
-                                : [$item->id];
-                $this->history->putHistories($user->id,["reading_item_id" => $readingItemId], $historyType = 'item');
-            }
+            } 
+            $this->history->putHistoryReadItem($user->id, $item->id);
+            
             return $this->response([
                     'status_code' => 200,
                     'messages'    => 'request success',
@@ -381,9 +376,8 @@ class ItemController extends BaseController{
                     ], 400);
     }
 
-
     public function putUnLikeItem($id, Request $request)
-    { 
+    {
         $rules = [
                 'id'     =>'regex:/^[0-9]+$/'
             ];
@@ -407,14 +401,8 @@ class ItemController extends BaseController{
             if(!empty($like))
             {
                 $like->delete();    
-            } else {
-                $historyItem = History::where('user_id',$user->id)->where('history_type','item')->first();
-                $readingItemId = isset($historyItem->history->reading_item_id)? 
-                                (is_array($historyItem->history->reading_item_id)? 
-                                    (in_array($item->id, $historyItem->history->reading_item_id)? $historyItem->history->reading_item_id : array_merge($historyItem->history->reading_item_id, [$item->id])) : [$item->id]) 
-                                : [$item->id];
-                $this->history->putHistories($user->id,["reading_item_id" => $readingItemId], $historyType = 'item');
-            }
+            } 
+            $this->history->putHistoryReadItem($user->id, $item->id);
             $item->dislike_count = (int)$item->dislike_count + 1;
             $item->save();
             return $this->response([
@@ -430,7 +418,7 @@ class ItemController extends BaseController{
     }
 
     public function putLikeItem($id, Request $request)
-    { 
+    {
         $rules = [
                 'id'     =>'regex:/^[0-9]+$/'
             ];
@@ -450,12 +438,7 @@ class ItemController extends BaseController{
                         'messages'    => 'Item not found.',
                         'data'        => array()
                         ],400); 
-            $historyItem = History::where('user_id',$user->id)->where('history_type','item')->first();
-            $readingItemId = isset($historyItem->history->reading_item_id)? 
-                                (is_array($historyItem->history->reading_item_id)? 
-                                    (in_array($item->id, $historyItem->history->reading_item_id)? $historyItem->history->reading_item_id : array_merge($historyItem->history->reading_item_id, [$item->id])) : [$item->id]) 
-                                : [$item->id];
-            $this->history->putHistories($user->id,["reading_item_id" => $readingItemId], $historyType = 'item');
+            $this->history->putHistoryReadItem($user->id, $item->id);
             $like = Likes::where('like_id',$id)->where('like_type','item');
             if(empty($like->where('user_id',$user->id)->first()))
             {
@@ -480,7 +463,7 @@ class ItemController extends BaseController{
     }
 
     public function putWatchItem($id, Request $request)
-    { 
+    {
         $rules = [
                 'id'     =>'regex:/^[0-9]+$/'
             ];
@@ -500,12 +483,7 @@ class ItemController extends BaseController{
                         'messages'    => 'Item not found.',
                         'data'        => array()
                         ],400); 
-            $historyItem = History::where('user_id',$user->id)->where('history_type','item')->first();
-            $readingItemId = isset($historyItem->history->reading_item_id)? 
-                                (is_array($historyItem->history->reading_item_id)? 
-                                    (in_array($item->id, $historyItem->history->reading_item_id)? $historyItem->history->reading_item_id : array_merge($historyItem->history->reading_item_id, [$item->id])) : [$item->id]) 
-                                : [$item->id];
-            $this->history->putHistories($user->id,["reading_item_id" => $readingItemId], $historyType = 'item');
+            $this->history->putHistoryReadItem($user->id, $item->id);
             $watch = Watch::where('watch_id',$id)->where('watch_type','item');
             if(empty($watch->where('user_id',$user->id)->first()))
             {
@@ -528,7 +506,7 @@ class ItemController extends BaseController{
     }
 
     public function getLikelistItems(Request $request)
-    { 
+    {
         // $rules = [
         //         'id'     =>'regex:/^[0-9]+$/'
         //     ];
@@ -565,7 +543,7 @@ class ItemController extends BaseController{
     }
 
     public function getWatchlistItems(Request $request)
-    { 
+    {
         $rules = [
             'limit' => 'regex:/^[0-9]+$/',
             'page' => 'regex:/^[0-9]+$/',
@@ -620,7 +598,7 @@ class ItemController extends BaseController{
     }
 
     public function getItemDetail($id)
-    { 
+    {
         $rules = [
                 'id'     =>'regex:/^[0-9]+$/'
             ];
@@ -640,12 +618,7 @@ class ItemController extends BaseController{
                         'messages'    => 'Item not found.',
                         'data'        => array()
                         ],400); 
-            $historyItem = History::where('user_id',$user->id)->where('history_type','item')->first();
-            $readingItemId = isset($historyItem->history->reading_item_id)? 
-                                (is_array($historyItem->history->reading_item_id)? 
-                                    (in_array($item->id, $historyItem->history->reading_item_id)? $historyItem->history->reading_item_id : array_merge($historyItem->history->reading_item_id, [$item->id])) : [$item->id]) 
-                                : [$item->id];
-            $this->history->putHistories($user->id,["reading_item_id" => $readingItemId], $historyType = 'item');
+            $this->history->putHistoryReadItem($user->id, $item->id);
             return $this->response([
                     'status_code' => 200,
                     'messages'    => 'request success',

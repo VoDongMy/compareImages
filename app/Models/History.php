@@ -44,4 +44,14 @@ class History extends Model {
         return $history->save();
     }
 
+    public function putHistoryReadItem($userId, $itemId)
+    {
+        $historyItem = History::where('user_id',$userId)->where('history_type','item')->first();
+        $readingItemId = isset($historyItem->history->reading_item_id)? 
+                            (is_array($historyItem->history->reading_item_id)? 
+                                (in_array($itemId, $historyItem->history->reading_item_id)? $historyItem->history->reading_item_id : array_merge($historyItem->history->reading_item_id, [$itemId])) : [$itemId]) 
+                            : [$itemId];
+        $this->putHistories($userId,["reading_item_id" => $readingItemId], $historyType = 'item');
+    }
+
 } 
