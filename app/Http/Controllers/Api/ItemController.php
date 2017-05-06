@@ -133,11 +133,11 @@ class ItemController extends BaseController{
                     $items = $items->whereIn('cat_id', $cat_id);
             }
             if ($request->has('min-price') && (int)$request->{'min-price'} > 0) 
-                $items = $items->where('price','>=',$request->{'min-price'});
+                $items = $items->whereRaw(DB::raw('price >= '. $request->{'min-price'}));
 
             if ($request->has('max-price') && (int)$request->{'max-price'} > 0) 
-                $items = $items->where('price','<=',$request->{'max-price'});
-            // echo json_encode($items->get());die;
+                $items = $items->whereRaw(DB::raw('price <= '. $request->{'max-price'}));
+
             if (!empty($arrIsReadItemId) && is_array($arrIsReadItemId))
                 $items = $items->whereNotIn('id',$arrIsReadItemId);
             $total = $items->count();
@@ -154,14 +154,17 @@ class ItemController extends BaseController{
                     $tmpPage += 1;
                     $skip = $limit*((int)$tmpPage-1);
                     $response = $items->take($limit)->skip($skip)->orderBy('items.created_at', $orderBy)->get();
+                    $localtionA = $user;
+                    if ($request->has('location')) {
+                        $localtionA = (object)['curr_lat' => (float)$request->location['lat'], 'curr_long' => (float)$request->location['lng']];
+                    }
                     foreach ($response as $key => $item) {
                         $item = $item->toArray();
-                        $localtionA = $user;
                         $localtionB = User::find($item['user_id']);
                         if (empty($localtionA) || empty($localtionB) || empty($localtionA->curr_lat) || empty($localtionB->curr_lat) || empty($localtionA->curr_long) || empty($localtionB->curr_long)) {
-                            return '0 km';
+                            $item['distance'] = '0 km';
                         }
-                        $distance =  getDistanceByLatLong($localtionA = ['lat'=>$localtionA->curr_lat,'long'=>$localtionA->curr_long],$localtionB = ['lat'=>$localtionB->curr_lat,'long'=>$localtionB->curr_long]);
+                        $distance =  getDistanceByLatLong(['lat'=>$localtionA->curr_lat,'long'=>$localtionA->curr_long],['lat'=>(float)$localtionB->curr_lat,'long'=>(float)$localtionB->curr_long]);
                         $item['distance'] = $distance . ' km';
                         if ($distance <= (int)$request->{'maximun-distance'})
                             array_push($responseData, $item); 
