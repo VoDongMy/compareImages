@@ -616,7 +616,7 @@ class ItemController extends BaseController{
                         'data'        => array()
                         ],401); 
             $item = Items::with('pictures','category','user')->find($id);
-            if(ßempty($item))
+            if(empty($item))
                 return response()->json([
                         'status_code' => 400,
                         'messages'    => 'Item not found.',
