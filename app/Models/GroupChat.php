@@ -69,9 +69,14 @@ class GroupChat extends Model
     			return (object)['type' => ''];
     			break;
 
-    		case 1:
-    			$object = Bids::select('bids.id as bid_id','items.id','items.title','items.user_id as item_user_id', 'bids.price_bidding as bidding_price', 'items.price as item_price', 'bids.status as status')->join('items', 'items.id', '=', 'bids.item_id')->find($this->object_id);
-    			return empty($object)? (object)[] : (object)array_merge($object->toArray(),['type' => 'biding']);
+            case 1:
+                $object = Bids::select('bids.id as bid_id','items.id','items.title','items.user_id as item_user_id', 'bids.price_bidding as bidding_price', 'items.price as item_price', 'bids.status as status')->join('items', 'items.id', '=', 'bids.item_id')->find($this->object_id);
+                return empty($object)? (object)[] : (object)array_merge($object->toArray(),['type' => 'biding']);
+                break;
+
+    		case 2:
+    			$object = Exchanges::select('exchanges.id as exchanges_id','items.id','items.title','items.user_id as item_user_id', 'items.price as item_price', 'exchanges.status as status')->join('items', 'items.id', '=', 'exchanges.item_id')->find($this->object_id);
+    			return empty($object)? (object)[] : (object)array_merge($object->toArray(),['type' => 'exchange']);
     			break;
     		
     		default:
