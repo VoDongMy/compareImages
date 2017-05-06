@@ -72,6 +72,7 @@ class BidController extends BaseController{
 	            $bid->price_bidding = $request->price;
 	            $bid->status = 1;
 	            if ($bid->save()) {
+                    $this->history->putHistoryReadItem($user->id, $id);
 	                //$notifySetting
 	            	$messages = 'New biding item ' . $item->title . ' $' . $request->price;
 

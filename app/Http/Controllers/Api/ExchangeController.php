@@ -77,6 +77,7 @@ class ExchangeController extends BaseController{
 	            $exchange->item_exchange_id = $request->item_exchange_id;
 	            $exchange->status = 1;
 	            if ($exchange->save()) {
+                    $this->history->putHistoryReadItem($user->id, $id);
 	                //$notifySetting
 	            	$messages = 'New exchange item ' . $item->title . ' vs ' . $item_exchange->title;
 
