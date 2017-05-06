@@ -66,21 +66,21 @@ class GroupChat extends Model
     {
     	switch ($this->object_type) {
     		case 0:
-    			return (object)['type' => ''];
+    			return (object)['type' => 0];
     			break;
 
             case 1:
                 $object = Bids::select('bids.id as bid_id','items.id','items.title','items.user_id as item_user_id', 'bids.price_bidding as bidding_price', 'items.price as item_price', 'bids.status as status')->join('items', 'items.id', '=', 'bids.item_id')->find($this->object_id);
-                return empty($object)? (object)[] : (object)array_merge($object->toArray(),['type' => 'biding']);
+                return empty($object)? (object)[] : (object)array_merge($object->toArray(),['type' => 1]);
                 break;
 
     		case 2:
     			$object = Exchanges::select('exchanges.id as exchanges_id','items.id','items.title','items.user_id as item_user_id', 'items.price as item_price', 'exchanges.status as status')->join('items', 'items.id', '=', 'exchanges.item_id')->find($this->object_id);
-    			return empty($object)? (object)[] : (object)array_merge($object->toArray(),['type' => 'exchange']);
+    			return empty($object)? (object)[] : (object)array_merge($object->toArray(),['type' => 2]);
     			break;
     		
     		default:
-    			return (object)['type' => ''];
+    			return (object)['type' => 0];
     			break;
     	}
         return (object)[];
