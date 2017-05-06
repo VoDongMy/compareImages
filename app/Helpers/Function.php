@@ -22,16 +22,16 @@ function getDurationAgo( $ptime )
     if ($datediff <= 10) {
         return $time = "less than 1 second ago";
     } else if (10 < $datediff && $datediff < 60) {
-        $time = $datediff . "second";
+        $time = $datediff . " second";
     } else if (60 < $datediff && $datediff <= 3600) {
         $result = floor($datediff / 60);
-        $time = $result . "minute";
+        $time = $result . " minute";
     } else if (3600 < $datediff && $datediff < 24 * 3600) {
         $result = floor($datediff / 3600);
-        $time = $result . "hour";
+        $time = $result . " hour";
     } else if ((24 * 3600 < $datediff) && ($datediff < (7 * 24 * 3600))) {
         $result = floor($datediff / (3600 * 24));
-        $time = $result . "day";
+        $time = $result . " day";
     } else {
         $time = date("Y-m-d H:i:s", strtotime($ptime));
     }
