@@ -77,7 +77,7 @@ class Message extends Model {
 
         $item = Items::with(array('user'=>function($query){
                         $query->leftJoin('user_tokens', 'users.id', '=', 'user_tokens.user_id')->select('users.id', 'users.name','user_tokens.device_token');
-                    }))->find($exchange->item_id);
+                    }))->find($exchange->item_exchange_id);
  
         if ($item) {
             $myGroupChat = GroupChat::where('user_id', $userId )->where('object_type',2)->where('object_id',$exchange->id)->first();

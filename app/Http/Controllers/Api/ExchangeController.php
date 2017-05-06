@@ -130,13 +130,15 @@ class ExchangeController extends BaseController{
 	        	$item = Items::with(array('user'=>function($query){
 	                        $query->leftJoin('user_tokens', 'users.id', '=', 'user_tokens.user_id')->select('users.id','user_tokens.device_token');
 	                    }))->find($exchange->item->id);
-	        	// 1:waiting accepts / 2:accepted / 3:unaccepts
-	            $exchange->status = $request->status;
-	            if ($exchange->save()) {
-	                //$notifySetting
-	                $messages = ' exchange item is accepted';
-
-	                $this->message->pushExchangeMessageToUser($user->id, $parameter = ['exchangeId' => $exchange->id, 'content' => $messages]);	            }
+                // 1:waiting accepts / 2:accepted / 3:unaccepts
+                $exchange->status = $request->status;
+                if ($exchange->save()) {
+                    //$notifySetting
+                    $messages = ' exchange item is accepted';
+                    $data = true;
+                    
+	                $this->message->pushExchangeMessageToUser($user->id, $parameter = ['exchangeId' => $exchange->id, 'content' => $messages]);	           
+                }
         	} catch (Exception $e) {
         		$messages = $e->getMessage();
         	}
