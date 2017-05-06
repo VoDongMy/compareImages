@@ -18,7 +18,7 @@ class Bids extends Model {
     protected $fillable = ['price_bidding','status'];
 
     public function user() {
-        return $this->belongsTo('App\User');
+        return $this->belongsTo('App\Models\User');
     }
 
     public function item() {

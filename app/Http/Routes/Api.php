@@ -101,7 +101,7 @@ Route::group(['prefix' => 'api/'], function() {
 
             //Exchange
             Route::post('/item/exchange/{id}', 'ExchangeController@postExchangeItem');
-            // Route::put('/bidding/accept/{id}', 'BidController@putAcceptBiddingItem');
+            Route::put('/exchange/accept/{id}', 'ExchangeController@putAcceptExchangeItem');
 
             //Notification
             Route::get('/notifications', 'NotificationController@getNotify');

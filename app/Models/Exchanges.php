@@ -20,6 +20,13 @@ class Exchanges extends Model{
      *
      * @var array
      */
+    public function user() {
+        return $this->belongsTo('App\Models\User');
+    }
+
+    public function item() {
+        return $this->belongsTo('App\Models\Items');
+    }
 
 
 }

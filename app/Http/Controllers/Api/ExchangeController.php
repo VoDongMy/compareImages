@@ -105,7 +105,7 @@ class ExchangeController extends BaseController{
         ], 200);
     }
 
-    public function putAcceptBiddingItem($id, Request $request)
+    public function putAcceptExchangeItem($id, Request $request)
     {
         $rules = [
                 'id'=>'required|regex:/^[0-9]+$/',
@@ -119,24 +119,24 @@ class ExchangeController extends BaseController{
 	        	if(empty($user))
 	        		throw new Exception("Unauthorized", 400);	
 
-	            $biding = Bids::whereHas('item', function ( $query ) use ($user) {
+	            $exchange = Exchanges::whereHas('item', function ( $query ) use ($user) {
 				                $query->where('user_id', $user->id );
 				               })->find($id);
 
 
-	        	if(empty($biding))
-	        		throw new Exception("biding item id does not exist", 400);	            
+	        	if(empty($exchange))
+	        		throw new Exception("exchange item id does not exist", 400);	            
 
 	        	$item = Items::with(array('user'=>function($query){
 	                        $query->leftJoin('user_tokens', 'users.id', '=', 'user_tokens.user_id')->select('users.id','user_tokens.device_token');
-	                    }))->find($biding->item->id);
+	                    }))->find($exchange->item->id);
 	        	// 1:waiting accepts / 2:accepted / 3:unaccepts
-	            $biding->status = $request->status;
-	            if ($biding->save()) {
+	            $exchange->status = $request->status;
+	            if ($exchange->save()) {
 	                //$notifySetting
-	                $messages = ' biding item ' . $biding->item->title . ' $' . $biding->price_bidding . ' is accepted';
+	                $messages = ' exchange item is accepted';
 
-	                $this->message->pushBidingMessageToUser($user->id, $parameter = ['bidId' => $biding->id, 'content' => $messages]);	            }
+	                $this->message->pushExchangeMessageToUser($user->id, $parameter = ['exchangeId' => $exchange->id, 'content' => $messages]);	            }
         	} catch (Exception $e) {
         		$messages = $e->getMessage();
         	}
