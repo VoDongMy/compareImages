@@ -125,7 +125,9 @@ class Message extends Model {
 
     public function pushBidingMessageToUser($userId, $parameter = array('bidId'=>0,'content'=>''))
     {
-        $biding = Bids::find($parameter['bidId']);
+        $biding = Bids::with(array('user'=>function($query){
+                        $query->leftJoin('user_tokens', 'users.id', '=', 'user_tokens.user_id')->select('users.id', 'users.name','user_tokens.device_token');
+                    }))->find($parameter['bidId']);
         if (empty($biding)) 
             throw new Exception("bid item id does not exist", 400);
 
@@ -169,7 +171,7 @@ class Message extends Model {
 
             // send notify
             if ($biding->status == 2)
-                sendiOSNotification([$item->user->device_token], $messages = $parameter['content']);
+                sendiOSNotification([$biding->user->device_token], $messages = $parameter['content']);
 
             return $this->pushMessageToGroup($groupChat->id,['userId'=>$userId,'content'=>$parameter['content'],'type'=>0]);
         }

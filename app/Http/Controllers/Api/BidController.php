@@ -123,6 +123,7 @@ class BidController extends BaseController{
 	            $biding->status = $request->status;
 	            if ($biding->save()) {
 	                //$notifySetting
+                    $data = true;
 	                $messages = ' biding item ' . $biding->item->title . ' $' . $biding->price_bidding . ' is accepted';
 
 	                $this->message->pushBidingMessageToUser($user->id, $parameter = ['bidId' => $biding->id, 'content' => $messages]);	            }
