@@ -155,13 +155,14 @@ class ItemController extends BaseController{
                     $skip = $limit*((int)$tmpPage-1);
                     $response = $items->take($limit)->skip($skip)->orderBy('items.created_at', $orderBy)->get();
                     foreach ($response as $key => $item) {
+                        $item = $item->toArray();
                         $localtionA = $user;
-                        $localtionB = User::find($item->user_id);
+                        $localtionB = User::find($item['user_id']);
                         if (empty($localtionA) || empty($localtionB) || empty($localtionA->curr_lat) || empty($localtionB->curr_lat) || empty($localtionA->curr_long) || empty($localtionB->curr_long)) {
                             return '0 km';
                         }
                         $distance =  getDistanceByLatLong($localtionA = ['lat'=>$localtionA->curr_lat,'long'=>$localtionA->curr_long],$localtionB = ['lat'=>$localtionB->curr_lat,'long'=>$localtionB->curr_long]);
-                        $item->distance = $distance . ' km';
+                        $item['distance'] = $distance . ' km';
                         if ($distance <= (int)$request->{'maximun-distance'})
                             array_push($responseData, $item); 
                     }

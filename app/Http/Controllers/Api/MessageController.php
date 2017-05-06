@@ -49,7 +49,15 @@ class MessageController extends BaseController {
                 if (!empty($object)) {
                     switch ($object->type) 
                     {
-                        case 'biding':
+                        case 1:
+                            if ($user->id != $object->item_user_id && $object->status != 2) {
+                                unset($data[$key]);
+                            } else {
+                                array_push($response, $groupChat);
+                            }
+                            break;
+
+                        case 2:
                             if ($user->id != $object->item_user_id && $object->status != 2) {
                                 unset($data[$key]);
                             } else {
