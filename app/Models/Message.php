@@ -77,6 +77,10 @@ class Message extends Model {
 
         $item = Items::with(array('user'=>function($query){
                         $query->leftJoin('user_tokens', 'users.id', '=', 'user_tokens.user_id')->select('users.id', 'users.name','user_tokens.device_token');
+                    }))->find($exchange->item_id);
+
+        $itemExchange = Items::with(array('user'=>function($query){
+                        $query->leftJoin('user_tokens', 'users.id', '=', 'user_tokens.user_id')->select('users.id', 'users.name','user_tokens.device_token');
                     }))->find($exchange->item_exchange_id);
  
         if ($item) {
@@ -91,7 +95,7 @@ class Message extends Model {
             if (empty($groupChat)) {
                 $groupChat = new GroupChat;
                 $groupChat->user_id = $userId;
-                $groupChat->title = $item->user->name;
+                $groupChat->title = $itemExchange->user->name;
                 $groupChat->object_type = 2;
                 $groupChat->object_id = $exchange->id;
                 $groupChat->save();
@@ -115,7 +119,7 @@ class Message extends Model {
 
             // send notify
             if ($exchange->status == 2)
-                sendiOSNotification([$item->user->device_token], $messages = $parameter['content']);
+                sendiOSNotification([$itemExchange->user->device_token], $messages = $parameter['content']);
 
             return $this->pushMessageToGroup($groupChat->id,['userId'=>$userId,'content'=>$parameter['content'],'type'=>0]);
         }
