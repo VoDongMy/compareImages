@@ -36,27 +36,27 @@ class ApiAuth
         $method = $request->method();
         $baseString = "{$method}:{$url}";
 
-        DataLog::set('sign.log', $baseString);
+        // DataLog::set('sign.log', $baseString);
 
-        // API authenticate info
-        $secretKey = env('API_SECRET');
-        $apiKey = env('API_KEY');
+        // // API authenticate info
+        // $secretKey = env('API_SECRET');
+        // $apiKey = env('API_KEY');
 
-        $signature = base64_encode(hash_hmac('sha512', $baseString, $secretKey, true));
-        $requestApiKey = $request->header('Authenticate-Key');
-        $requestSignature = $request->header('Authenticate-Signature');
-        // back door for PostMan Dev
+        // $signature = base64_encode(hash_hmac('sha512', $baseString, $secretKey, true));
+        // $requestApiKey = $request->header('Authenticate-Key');
+        // $requestSignature = $request->header('Authenticate-Signature');
+        // // back door for PostMan Dev
 
-        if (md5($request->header('Back-Door')) == 'c1d77365ed8153733410bdcb2c679270') {
-            return $next($request);
-        }
-        // API authenticate
-        if ($requestApiKey != $apiKey || $requestSignature != $signature ) {
-            return response()->json([
-                    'status_code' => 401,
-                    'messages'    => 'Unauthorized',
-                    'data'        => array()
-                    ],401);
+        // if (md5($request->header('Back-Door')) == 'c1d77365ed8153733410bdcb2c679270') {
+        //     return $next($request);
+        // }
+        // // API authenticate
+        // if ($requestApiKey != $apiKey || $requestSignature != $signature ) {
+        //     return response()->json([
+        //             'status_code' => 401,
+        //             'messages'    => 'Unauthorized',
+        //             'data'        => array()
+        //             ],401);
         }
 
         return $next($request);
