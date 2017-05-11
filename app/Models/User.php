@@ -39,7 +39,7 @@ class User extends Model implements AuthenticatableContract,
     public function login($userId = 0, $parameter = array('udid'=>'0', 'device_token'=>'0')) {
         $token = (object)[];
         UserToken::where('user_id', $userId)->delete($userId);
-        $user = User::where('status',1)->find();
+        $user = User::where('status',1)->find($userId);
         if ($user) {
             $token               = UserToken::getInstance();
             $token->user_id      = $userId;
