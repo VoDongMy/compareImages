@@ -32,25 +32,27 @@ class UserController extends BaseController
     public function postSignup(Request $request)
     {
         $rules = [
-            'email'         =>'required',
-            'name'      => 'required',
-            'gender'        => 'in:male,female',
-            'curr_long'     =>'',
-            'curr_lat'      =>'',
-            'location'         =>''
+            'email'         =>'required|email',
+            'password'      => 'required|min:5',
         ];
     $validator = Validator::make($request->all(), $rules);
 	if ( $validator->passes() ) {
-            $user = User::where('fb_id',$request->facebook_id)->first();
+            $user = User::where('email',$request->email)->first();
             if(empty($user)) {
                 $user =  new User();
-                $user->fb_id = $request->facebook_id;
+                $user->password = Hash::make($request->password);
                 $user->email =  $request->email;
                 $user->save();
+            } elseif ($user->password != Hash::make($request->password)) {
+                return $this->response([
+                    'status_code' => 400,
+                    'messages'    =>  'invalid email or password.',
+                    'data'        => array()
+                    ], 401);
             }
 
             // get new token
-            $token = $this->userModel->login($user->id, $parameter = array('udid'=>$request->udid, 'device_type'=>$request->device_type));
+            $token = $this->userModel->login($user->id, $parameter = array('udid'=>'1234567890', 'device_type'=>'0'));
             if(empty($token))
             {
                 return $this->response([
