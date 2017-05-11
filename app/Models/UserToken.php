@@ -5,6 +5,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserToken extends Model {
 
+    /**
+     * The database table used by the model.
+     *
+     * @var string
+     */
+    protected $table = 'user_token';
+
 	protected $guarded = ['key'];
 
     public static function randomKey($size) {

@@ -12,7 +12,7 @@ class CreateTokensTable extends Migration {
 	 */
 	public function up()
 	{
-		Schema::create('tokens', function(Blueprint $table)
+		Schema::create('user_tokens', function(Blueprint $table)
 		{
 			$table->increments('id');
 			$table->integer('user_id');

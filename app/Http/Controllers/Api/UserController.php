@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Facades\Image;
 use App\Helpers\DataLog;
 
+use Hash;
+
 class UserController extends BaseController
 {
     protected $userModel;
@@ -62,8 +64,6 @@ class UserController extends BaseController
                     ], 401);
 
             }
-            $user->email =  $request->email;
-            $user->save();
 	    $token = UserToken::with('user')->find($token->id);
             return $this->response([
                     'status_code' => 200,
