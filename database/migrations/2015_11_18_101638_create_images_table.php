@@ -16,6 +16,8 @@ class CreateImagesTable extends Migration
             $table->increments('id');
             $table->integer('user_id');
             $table->string('url');
+            $table->string('thumbnail');
+            $table->integer('size');
             $table->text('notes');
             $table->softDeletes();
             $table->timestamps();

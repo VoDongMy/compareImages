@@ -36,7 +36,7 @@ class Controller extends BaseController
     {
 
         $rules = [
-            'image'      =>'required|mimes:jpeg,jpg,png' // 'max:200px',
+            'image'      =>'required|mimes:jpeg,jpg,png', // 'max:200px',
             'notes'      =>'required' // 
             ];
         $validator = Validator::make($request->all(), $rules);
@@ -51,7 +51,7 @@ class Controller extends BaseController
 
             }
             if (is_array($request->images)) {
-                $directory = 'data/'.$user->id.'/images/'.date('Y/m/d');
+                $directory = 'data/images/';
                 Upload::findOrCreateFolder($directory);
                 foreach ($request->images as $key => $image) {
                     $filePath = Upload::uploadFile($image,$directory,md5(microtime()).'.'.$image->getClientOriginalName());
@@ -59,7 +59,6 @@ class Controller extends BaseController
                     $picture->url = $filePath;
                     $picture->thumbnail = Upload::cropImages($filePath,$directory,md5(microtime()).'_100_100.'.$image->getClientOriginalName(),100,100, $fit = null);
                     $picture->size = filesize($filePath);
-                    $picture->item_id = 0;
                     $picture->user_id = $user->id;
                     $picture->save();    
                     $dataPicture[] = $picture;            

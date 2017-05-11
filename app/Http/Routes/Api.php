@@ -14,10 +14,9 @@ Route::group(['prefix' => 'demo/'], function() {
         
         //Group Athenticate
         Route::group(['middleware' => 'auth.base.api'], function() {
-        Route::group(['middleware' => ''], function() {
             Route::post('/file/upload-images', 'Controller@postUploadImages');
 
-
+         
 
         });
     });
