@@ -36,8 +36,8 @@ class Controller extends BaseController
     {
 
         $rules = [
-            'images'      =>'required|mimes:jpeg,jpg,png' // 'max:200px',
-            'note'      =>'required' // 
+            'image'      =>'required|mimes:jpeg,jpg,png' // 'max:200px',
+            'notes'      =>'required' // 
             ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->passes()) {
