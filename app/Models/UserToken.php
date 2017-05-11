@@ -10,7 +10,7 @@ class UserToken extends Model {
      *
      * @var string
      */
-    protected $table = 'user_token';
+    protected $table = 'user_tokens';
 
 	protected $guarded = ['key'];
 

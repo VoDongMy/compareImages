@@ -44,8 +44,9 @@ class UserController extends BaseController
                 $user =  new User();
                 $user->password = Hash::make($request->password);
                 $user->email =  $request->email;
+                $user->status =  1;
                 $user->save();
-            } elseif ($user->password != Hash::make($request->password)) {
+            } elseif (!Hash::check($request->password, $user->password) ) {
                 return $this->response([
                     'status_code' => 400,
                     'messages'    =>  'invalid email or password.',
