@@ -36,7 +36,7 @@ class Controller extends BaseController
     {
 
         $rules = [
-            'image'      =>'required|mimes:jpeg,jpg,png', // 'max:200px',
+            // 'image'      =>'required|mimes:jpeg,jpg,png', // 'max:200px',
             'notes'      =>'required' // 
             ];
         $validator = Validator::make($request->all(), $rules);
@@ -60,6 +60,7 @@ class Controller extends BaseController
                     $picture->thumbnail = Upload::cropImages($filePath,$directory,md5(microtime()).'_100_100.'.$image->getClientOriginalName(),100,100, $fit = null);
                     $picture->size = filesize($filePath);
                     $picture->user_id = $user->id;
+                    $picture->notes = $request->notes;
                     $picture->save();    
                     $dataPicture[] = $picture;            
                 }
@@ -68,7 +69,7 @@ class Controller extends BaseController
                         'status_code' => 200,
                         'messages'    => 'request success',
                         'data'        => ['total'  => count($dataPicture), 
-                                'items'     => $dataPicture]
+                        'items'     => $dataPicture]
                         ], 200);               
             }
         }
