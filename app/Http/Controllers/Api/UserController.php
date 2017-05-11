@@ -32,7 +32,7 @@ class UserController extends BaseController
     public function postSignup(Request $request)
     {
         $rules = [
-            'facebook_id'         =>'required',
+            'email'         =>'required',
             'name'      => 'required',
             'gender'        => 'in:male,female',
             'curr_long'     =>'',
@@ -60,17 +60,7 @@ class UserController extends BaseController
                     ], 401);
 
             }
-
-            $user->fb_id = $request->facebook_id;
-            $user->name = $request->name;
             $user->email =  $request->email;
-            $user->gender = ucfirst($request->gender);
-            $user->dob = date('Y-m-d',strtotime($request->dob));
-            $user->phone = isset($request->phone)?$request->phone:'';
-            $user->profile_image = $request->url;
-            $user->curr_lat = $request->has('curr_lat')? $request->curr_lat : '';
-            $user->curr_long = $request->has('curr_long')? $request->curr_long : '';
-            $user->location = $request->location? $request->location : 'N/A';
             $user->save();
 	    $token = UserToken::with('user')->find($token->id);
             return $this->response([

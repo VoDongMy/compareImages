@@ -16,7 +16,7 @@ class Controller extends BaseController
     {
         $res = ['status' => 200,
                 'messages' => 'request success',
-                'sever_name'=>'Batr', 
+                'sever_name'=>'CompareImages', 
                 'language' => 'php',
                 'database' => 'mysql',
                 'version' => '',

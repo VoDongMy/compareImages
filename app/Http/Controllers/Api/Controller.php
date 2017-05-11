@@ -20,8 +20,8 @@ class Controller extends BaseController
 
     public function getDescription()
     {
-        $dataResponse = ['sever_name'  => 'Batr', 
-                         'version'     => '1.0.1',
+        $dataResponse = ['sever_name'  => 'DemoCompareImages', 
+                         'version'     => '1.0.0',
                          'language'    => 'php',
                          'database'    => 'mysql',
                          'description' => ''];
@@ -36,8 +36,9 @@ class Controller extends BaseController
     {
 
         $rules = [
-            // 'images.*'      =>'required|mimes:jpeg,jpg,png' // 'max:200px'
-        ];
+            'images'      =>'required|mimes:jpeg,jpg,png' // 'max:200px'
+            'note'      =>'required' // 
+            ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->passes()) {
             $user = $this->user;
