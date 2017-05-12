@@ -15,7 +15,7 @@ Route::group(['prefix' => 'demo/'], function() {
         //Group Athenticate
         Route::group(['middleware' => 'auth.base.api'], function() {
             Route::post('/file/upload-images', 'Controller@postUploadImages');
-            Route::post('request', 'Controller@getDescription');
+            Route::post('/compare-imge', 'Controller@PostCompareImages');
 
          
 

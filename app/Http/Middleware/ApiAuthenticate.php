@@ -25,8 +25,8 @@ class ApiAuthenticate
      */
     public function handle($request, Closure $next)
     {
-        // DataLog::logPublic('request.log', $request->url());
-        // DataLog::logPublic('request.log', $request->all());
+        DataLog::logPublic('request.log', $request->url());
+         DataLog::logPublic('request.log', $request->all());
         if ($request->header('User-Token')) {
             $token = $this->userToken->where('key',$request->header('User-Token'))->first();
             if ($token)
