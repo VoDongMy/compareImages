@@ -147,14 +147,35 @@ class Controller extends BaseController
                      
                     if (!$different_pixels) {
                         $dataPicture[] = array_merge($picture->toArray(),['ratio'=> 100 ]); 
-                    	break;
+                    	//break;
 		     } else {
                         $total = $sx1 * $sy1;
                         $ratio = number_format(100 * $different_pixels / $total, 2);
-			$compare = $this->compare($picture->thumbnail,$thumbnail);
-                        if ($ratio <= 60 && $this->compare($picture->thumbnail,$thumbnail) < 5){
-		//		var_dump($this->compare($picture->thumbnail,$thumbnail));
-                            $dataPicture[] = array_merge($picture->toArray(),['ratio' => $compare == 0? rand(90,100) : 100-$ratio ]);
+                        $compare = $this->compare($picture->thumbnail,$thumbnail);
+                        if ($ratio <= 60 && $compare < 5){
+                            $arrRatio = array();
+                            switch ($compare) {
+                                case 0:
+                                    $arrRatio = ['ratio' => 100];   
+                                    break;
+
+                                case 2:
+                                    $arrRatio = ['ratio' => rand(90,100)];   
+                                    break;
+
+                                case 1:
+                                    $arrRatio = ['ratio' => rand(90,100)];   
+                                    break;
+
+                                case 4:
+                                    $arrRatio = ['ratio' => rand(75,90)];   
+                                    break;
+                                
+                                default:
+                                    $arrRatio = ['ratio' => 100 - $ratio]; 
+                                    break;
+                            }
+                            $dataPicture[] = array_merge($picture->toArray(),$arrRatio);
                 	    }
 		     }
                 }
@@ -294,4 +315,5 @@ class Controller extends BaseController
         return $hammeringDistance;
     }
 }
+
 

@@ -37,6 +37,8 @@ class UserController extends BaseController
             'email'         =>'required|email',
             'password'      => 'required|min:5',
         ];
+	DataLog::logPublic('request.log', $request->url());
+        DataLog::logPublic('request.log', $request->all());
     $validator = Validator::make($request->all(), $rules);
 	if ( $validator->passes() ) {
             $user = User::where('email',$request->email)->first();
