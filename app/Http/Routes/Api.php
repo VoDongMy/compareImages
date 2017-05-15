@@ -16,9 +16,7 @@ Route::group(['prefix' => 'demo/'], function() {
         Route::group(['middleware' => 'auth.base.api'], function() {
             Route::post('/file/upload-images', 'Controller@postUploadImages');
             Route::post('/compare-imge', 'Controller@PostCompareImages');
-
-         
-
+            Route::post('/check-compare-imge', 'Controller@PostCheckCompareImages');
         });
     });
 });
